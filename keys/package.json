@@ -1,0 +1,77 @@
+{
+  "name": "@synthetism/keys",
+  "version": "1.0.0",
+  "description": "Zero-dependency cryptographic primitives: generate, derive, convert and verify. No state, no signer, no framework.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synthetism/keys.git"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "biome lint ./src",
+    "lint:fix": "biome lint --write ./src",
+    "format": "biome format --write ./src ./test",
+    "prepublishOnly": "npm run clean && npm run typecheck && npm run test && npm run build",
+    "version:dev": "npm version --no-git-tag-version prerelease --preid=dev",
+    "version:patch": "npm version --no-git-tag-version patch",
+    "version:minor": "npm version --no-git-tag-version minor",
+    "publish:dev": "npm publish --tag dev",
+    "publish:prod": "npm publish"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^24.19.2",
+    "@vitest/coverage-v8": "^5.0.4",
+    "typescript": "^5.8.3",
+    "vitest": "^5.0.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "keywords": [
+    "keys",
+    "key-generation",
+    "cryptography",
+    "ed25519",
+    "x25519",
+    "secp256k1",
+    "wireguard",
+    "zero-dependency",
+    "security",
+    "synthetism"
+  ],
+  "author": {
+    "name": "Synthetism",
+    "email": "core@synthetism.ai",
+    "url": "https://synthetism.org"
+  },
+  "homepage": "https://synthetism.org",
+  "bugs": {
+    "url": "https://github.com/synthetism/keys/issues"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "name": "@synthetism/signer",
+  "version": "1.0.0",
+  "description": "The in-process signer — a leaf over @synthetism/keys that satisfies the ISigner port without ever depending on it.",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json",
+    "check:dts": "node scripts/check-dts.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run clean && npm run typecheck && npm test && npm run build && npm run check:dts"
+  },
+  "dependencies": {
+    "@synthetism/keys": "^1.0.0"
+  },
+  "devDependencies": {
+    "@synthetism/did": "^1.0.0",
+    "@synthetism/vc": "^1.0.0",
+    "@types/node": "^24.19.2",
+    "typescript": "^5.8.3",
+    "vitest": "^5.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synthetism/signer.git"
+  },
+  "homepage": "https://synthetism.org",
+  "bugs": {
+    "url": "https://github.com/synthetism/signer/issues"
+  },
+  "author": {
+    "name": "Synthetism",
+    "email": "core@synthetism.ai",
+    "url": "https://synthetism.org"
+  },
+  "keywords": [
+    "synthetism",
+    "signer",
+    "ed25519",
+    "did:key",
+    "ssi",
+    "zero-dependency"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}

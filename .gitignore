@@ -1,0 +1,16 @@
+node_modules
+dist
+coverage
+*.log
+*.tgz
+.DS_Store
+
+# A staged publish credential must never be committed.
+.npmrc
+
+# Backups, not sources.
+*.bak
+
+# Not part of this repository. Both are excluded from the workspace too — see README.
+unit/
+vp/
