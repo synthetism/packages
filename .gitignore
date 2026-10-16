@@ -13,4 +13,4 @@ coverage
 
 # Not part of this repository. Both are excluded from the workspace too — see README.
 unit/
-vp/
+vp-old/

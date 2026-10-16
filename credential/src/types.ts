@@ -25,6 +25,39 @@ export interface Proof {
 }
 
 /**
+ * A data schema this document claims to conform to (VC Data Model §5.4).
+ *
+ * This is where a shape's **address** belongs — on the document, not buried in a
+ * subject. `id` points at the shape; the document's own version, if it has one, is
+ * in `meta`. One address, one meaning, and a reader who does not trust its cached
+ * copy knows exactly where the current one lives.
+ */
+export interface CredentialSchema {
+  /** The URI identifying the schema file. */
+  id: string;
+  /** The schema type, e.g. `"JsonSchemaValidator2018"`. */
+  type: string;
+  [x: string]: unknown;
+}
+
+/**
+ * Where this credential's revocation or suspension can be discovered (VC Data Model
+ * §4.9).
+ *
+ * Our own revocation story needs none of this — an issuer stops renewing, and every
+ * holder verifies that offline. This field is for the party who *cannot* see the
+ * renewal schedule and still has to know: a third-party verifier, later, holding a
+ * credential that looks perfectly valid.
+ */
+export interface CredentialStatus {
+  /** The URI where status can be discovered. */
+  id: string;
+  /** The status method, e.g. `"StatusList2021Entry"`. */
+  type: string;
+  [x: string]: unknown;
+}
+
+/**
  * A W3C Verifiable Credential.
  *
  * `proof` is **absent** on an unsigned credential — that is the whole point of the
@@ -39,6 +72,10 @@ export interface VerifiableCredential<S = CredentialSubject> {
   expirationDate?: string;
   credentialSubject: S;
   proof?: Proof;
+  /** One or more schemas this credential conforms to — see `CredentialSchema`. */
+  credentialSchema?: CredentialSchema | CredentialSchema[];
+  /** Where to discover this credential's status — see `CredentialStatus`. */
+  credentialStatus?: CredentialStatus | CredentialStatus[];
   meta?: Record<string, unknown>;
 }
 
@@ -55,6 +92,16 @@ export interface VerifiablePresentation<C = VerifiableCredential> {
   type: ["VerifiablePresentation", ...string[]];
   holder: Holder;
   verifiableCredential: C[];
+  /**
+   * The window, written by `present` from the verifier's challenge.
+   *
+   * Optional in the data model and always present in ours, because the JWT's `nbf`
+   * and `exp` MUST represent these two fields (§6.3.1) — so a window that lives only
+   * in the claims represents nothing, and a presentation with no dates is a
+   * presentation with no expiry.
+   */
+  issuanceDate?: string;
+  expirationDate?: string;
   proof?: Proof;
 }
 
@@ -76,7 +123,6 @@ export interface CredentialSubject {
 
 /** "Who I am", self-attested or issued by another. */
 export interface IdentitySubject extends CredentialSubject {
-  issuedBy: Holder;
 }
 
 /** An agent's identity, with the scope it operates in. */
@@ -86,7 +132,6 @@ export interface AgentIdentitySubject extends IdentitySubject {
 
 /** A service's identity, with where to reach it. */
 export interface ServiceIdentitySubject extends IdentitySubject {
-  endpoint?: string;
   scope?: string[];
 }
 
@@ -98,14 +143,12 @@ export interface ServiceIdentitySubject extends IdentitySubject {
  * refuse one DID without anyone rotating a key.
  */
 export interface AuthorizationSubject extends CredentialSubject {
-  authorizedBy: Holder;
   scope?: string[];
   resource?: string;
 }
 
 /** Anything that can own or be owned. */
 export interface AssetSubject extends CredentialSubject {
-  issuedBy: Holder;
   parentAssetId?: string;
 }
 
@@ -123,21 +166,22 @@ export interface IpAssetSubject extends AssetSubject {
   ip: string;
 }
 
-export interface ContractSubject extends CredentialSubject {
+/* export interface ContractSubject extends CredentialSubject {
   service: Holder;
   terms: Record<string, unknown>;
-}
+  scope?: string[];
+  resource?: string;
+} */
 
 export interface ReceiptSubject extends CredentialSubject {
-  contractId: string;
+  parentAssetId: string;
   artifactHash: string;
   verdict: "honoured" | "breached";
 }
 
 export interface PolicySubject extends CredentialSubject {
-  issuedBy: Holder;
+
 }
 
 export interface DeclarationSubject extends CredentialSubject {
-  issuedBy: Holder;
 }

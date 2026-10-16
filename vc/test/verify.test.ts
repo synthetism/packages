@@ -170,13 +170,46 @@ describe("verify", () => {
 
   it("accepts an edited document only when told to stop comparing", async () => {
     const { credential } = await issued();
-    const edited = { ...credential, credentialSubject: { tampered: true } };
+
+    // The edit has to stay *shaped* like a credential: skipping the comparison
+    // forgives a document that disagrees with the bytes that were signed, not one
+    // that has stopped being a credential. So this widens the scope rather than
+    // demolishing the subject — which is also the edit that actually threatens us.
+    const edited = {
+      ...credential,
+      credentialSubject: { ...credential.credentialSubject, scope: ["read", "write"] },
+    };
 
     expect(verify(edited).verified).toBe(false);
     expect(verify(edited, { checkDocument: false })).toEqual({
       verified: true,
       errors: [],
     });
+  });
+
+  it("★ refuses a subject that names no holder, however it was asked to verify", async () => {
+    const { credential } = await issued();
+    const orphaned = { ...credential, credentialSubject: { scope: ["read"] } };
+
+    // Not a comparison failure — a shape one. A credential that names no party is
+    // refused at the door, and `checkDocument: false` cannot open it, because that
+    // flag forgives disagreement with the signed bytes, not a broken shape.
+    expect(verify(orphaned).errors.join(" ")).toMatch(
+      /structure: credentialSubject\.holder is required/,
+    );
+    expect(verify(orphaned, { checkDocument: false }).verified).toBe(false);
+  });
+
+  it("refuses several subjects in one credential", async () => {
+    const { credential } = await issued();
+    const many = {
+      ...credential,
+      credentialSubject: [credential.credentialSubject, credential.credentialSubject],
+    };
+
+    expect(verify(many).errors.join(" ")).toMatch(
+      /credentialSubject must be a single subject/,
+    );
   });
 
   it("never throws, whatever it is handed", async () => {

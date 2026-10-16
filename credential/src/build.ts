@@ -6,6 +6,8 @@
 import { randomBytes } from "node:crypto";
 import { DEFAULT_CONTEXT } from "./schema.js";
 import type {
+  CredentialSchema,
+  CredentialStatus,
   CredentialSubject,
   Holder,
   UnsignedCredential,
@@ -37,6 +39,10 @@ export interface CreateUnsignedArgs<S> {
   id?: string;
   context?: string[];
   validity?: { from?: string; until?: string };
+  /** One or more schemas this credential claims to conform to (§5.4). */
+  credentialSchema?: CredentialSchema | CredentialSchema[];
+  /** Where this credential's status can be discovered (§4.9). */
+  credentialStatus?: CredentialStatus | CredentialStatus[];
   meta?: Record<string, unknown>;
 }
 
@@ -63,6 +69,12 @@ export function createUnsigned<S = CredentialSubject>(
 
   if (args.validity?.until !== undefined) {
     unsigned.expirationDate = args.validity.until;
+  }
+  if (args.credentialSchema !== undefined) {
+    unsigned.credentialSchema = args.credentialSchema;
+  }
+  if (args.credentialStatus !== undefined) {
+    unsigned.credentialStatus = args.credentialStatus;
   }
   if (args.meta !== undefined) {
     unsigned.meta = args.meta;

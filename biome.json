@@ -17,8 +17,7 @@
       "tests/**",
       "examples/**",
       "scripts/**",
-      "unit/**",
-      "vp/**"
+      "unit/**"
     ]
   },
   "formatter": {

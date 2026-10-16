@@ -1,0 +1,13 @@
+node_modules
+dist
+coverage
+*.log
+.DS_Store
+
+# A `tsc` run without `outDir` emits beside the source. `dist/` is the only build
+# output; nothing but source belongs in `src/`.
+src/**/*.js
+src/**/*.js.map
+src/**/*.d.ts
+src/**/*.d.ts.map
+*.tsbuildinfo

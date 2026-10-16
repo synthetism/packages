@@ -9,10 +9,23 @@
  * Issuing canonicalises the payload (see `canonical.ts`). Verifying never
  * re-serialises — it reuses the literal JWT, so credentials from any implementation
  * verify unchanged.
+ *
+ * ## `JwtProof2020` is a profile, not a W3C proof format
+ *
+ * The VC Data Model (§6.3) defines exactly two proof formats: a **bare JWT**, where
+ * the compact serialisation *is* the credential and there is no `proof` property at
+ * all, and **Data Integrity**, where `proof` carries a `proofValue`. What we do is
+ * neither. The document stays a document — inspectable by a JSON-only consumer that
+ * never decodes anything — and the whole JWT that covers it is carried in
+ * `proof.jwt`. That is the Entra/Transmute profile.
+ *
+ * It is a deliberate choice, and the honest place to record it is here. Everything
+ * below it — the claim names, `nbf`/`exp`/`jti`, the decoding round-trip — is the
+ * standard's, and a processor that knows §6.3.1 will read our JWTs correctly.
  */
 
 import { canonicalize } from "./canonical.js";
-import type { UnsignedCredential, VerifiableCredential } from "./types.js";
+import type { Proof, UnsignedCredential, VerifiableCredential } from "./types.js";
 
 export const PROOF_TYPE = "JwtProof2020";
 export const DEFAULT_ALG = "EdDSA";
@@ -23,12 +36,42 @@ export interface JwtHeader {
   typ: string;
 }
 
+/**
+ * The registered claims of a JWT proof, shared by both artifacts.
+ *
+ * A credential's JWT carries `vc`; a presentation's carries `vp`. **Which of the two
+ * is present is what identifies the document** — that is why `alg` and `typ` can stay
+ * advisory while the payload does the distinguishing.
+ *
+ * Every claim here means what §6.3.1 says it means. That is not pedantry: these are
+ * the claims a *foreign* processor will decode by, so a claim carrying something else
+ * hands that processor a document nobody signed.
+ */
 export interface JwtPayload {
-  vc: unknown;
+  /** The credential, on a credential's JWT. */
+  vc?: unknown;
+  /** The presentation, on a presentation's JWT. */
+  vp?: unknown;
+  /** The issuer of a credential, or **the holder** of a presentation. */
   iss: string;
+  /** The document's own `id`. **Not** the anti-replay — that is `nonce`. */
   jti?: string;
+  /** Issued at, epoch seconds. The spec's examples carry it beside `nbf`. */
+  iat?: number;
+  /** Not before, epoch seconds — represents the document's `issuanceDate`. */
   nbf?: number;
+  /** Expiry, epoch seconds — represents the document's `expirationDate`. */
   exp?: number;
+  /** The intended verifier. Only a presentation has one. */
+  aud?: string;
+  /**
+   * The verifier's single-use nonce — **the anti-replay** (§6.3.1).
+   *
+   * Deliberately not `jti`. `jti` is the *presenter's* value and `nonce` is the
+   * *verifier's*, and replay protection resting on a value the presenter chooses is
+   * not replay protection at all.
+   */
+  nonce?: string;
   [x: string]: unknown;
 }
 
@@ -95,14 +138,18 @@ export function attachProof<S>(
 }
 
 /**
- * The portion of an issued credential that was signed — `header.payload`.
+ * The portion of an issued document that was signed — `header.payload`.
+ *
+ * Takes `unknown` on purpose. *"Which artifacts can carry a proof?"* is a question
+ * this function has no business answering — it looks for a proof and reports what it
+ * finds. A credential, a presentation, and an **unsigned** credential (which has no
+ * `proof` key at all, and so would be rejected by any narrower parameter type) are
+ * all perfectly good arguments.
  *
  * Taken **literally** from `proof.jwt`; never recomputed.
  */
-export function signedPortion(
-  credential: VerifiableCredential<unknown>,
-): string | null {
-  const jwt = credential.proof?.jwt;
+export function signedPortion(document: unknown): string | null {
+  const jwt = proofOf(document)?.jwt;
   if (typeof jwt !== "string") return null;
 
   const segments = jwt.split(".");
@@ -111,11 +158,11 @@ export function signedPortion(
   return `${segments[0]}.${segments[1]}`;
 }
 
-/** The decoded JWT parts of an issued credential, or `null` if malformed. */
+/** The decoded JWT parts of an issued document, or `null` if malformed. */
 export function decodeCredential(
-  credential: VerifiableCredential<unknown>,
+  document: unknown,
 ): { header: JwtHeader; payload: JwtPayload } | null {
-  const jwt = credential.proof?.jwt;
+  const jwt = proofOf(document)?.jwt;
   if (typeof jwt !== "string") return null;
 
   const segments = jwt.split(".");
@@ -129,6 +176,14 @@ export function decodeCredential(
   } catch {
     return null;
   }
+}
+
+/** The proof on a document, if it has one — credential, presentation, or neither. */
+function proofOf(document: unknown): Proof | undefined {
+  if (document === null || typeof document !== "object") return undefined;
+
+  const proof = (document as { proof?: unknown }).proof;
+  return proof !== null && typeof proof === "object" ? (proof as Proof) : undefined;
 }
 
 function epochSeconds(timestamp: string): number | null {
