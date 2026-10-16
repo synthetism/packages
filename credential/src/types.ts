@@ -147,6 +147,43 @@ export interface AuthorizationSubject extends CredentialSubject {
   resource?: string;
 }
 
+/**
+ * A service's record that control was proven and a session opened.
+ *
+ * The counterpart of the Authorization VC, and **the half of the handshake the agent
+ * has to check**. The agent verifies this before it does anything else, which is how it
+ * knows it is talking to the service it bought from: `issuer` must be the issuer named in
+ * its own Authorization VC, and the signature must verify. Two signatures, two
+ * directions — the agent proves control of the holder key, the service proves control of
+ * the issuer key. There is no third party in it and no shared secret.
+ *
+ * Its `id` is also the **session id**. One identifier covers the durable record and the
+ * runtime reference, and it is safe to send on every call only because it proves nothing
+ * on its own: what travels is a name, and what authorises is a fresh signature from the
+ * key pinned in the session.
+ *
+ * `authorizationId` is the link, and it is required. The Authorization VC is the source
+ * of truth and the session is a cache of it, so anything this credential says has to be
+ * re-derivable from the authorization it names. A session that does not say what it was
+ * opened under is an uncited assertion, and an uncited assertion is a credential you
+ * cannot audit.
+ *
+ * Two things are deliberately absent:
+ *
+ * - **the session token.** A durable artifact records that a session opened; the lease
+ *   is the runtime token and it travels *beside* this credential, never inside it.
+ * - **the pinned key.** The funnel's session row pins the `kid`, and that is operational
+ *   state. The key that opened the session is the `verificationMethod` of the
+ *   presentation that did it, which the funnel already holds — a copy here would be a
+ *   second place for one fact to be wrong.
+ */
+export interface AuthenticationSubject extends CredentialSubject {
+  /** The Authorization VC this session was opened under. */
+  authorizationId: string;
+  /** The scope the service resolved from that authorization — what this session may do. */
+  scope?: string[];
+}
+
 /** Anything that can own or be owned. */
 export interface AssetSubject extends CredentialSubject {
   parentAssetId?: string;
@@ -173,8 +210,34 @@ export interface IpAssetSubject extends AssetSubject {
   resource?: string;
 } */
 
+/**
+ * A receipt — *something happened, and here is the outcome.*
+ *
+ * **This is a base, and a service extends it.** Three fields, because three things are true of
+ * every receipt anywhere: who it was made out to, what it was about, and what the verdict was.
+ * Everything else — which session, which pool, how many units — is a *service's* decision, and a
+ * service extends this shape to say so:
+ *
+ * ```ts
+ * interface MarketReceiptSubject extends ReceiptSubject {
+ *   authenticationId?: string;
+ *   pool: string;
+ *   units?: number;
+ * }
+ * ```
+ *
+ * That line is not fussiness. A receipt is issued by a service and stored by a party, and the
+ * party does not care which session produced it — while the service cannot promise the same
+ * fields as its neighbour. Putting one service's vocabulary in the base would make the base a
+ * lie for every other service, which is exactly the mistake the old `parentAssetId` made: it
+ * claimed a receipt knows about assets, and then carried a pool id.
+ *
+ * And **a receipt does not imply an authentication.** A purchase has a receipt with no session;
+ * a free service has one with no meter. So nothing here may be required on the strength of "we
+ * always authenticate", because we do not.
+ */
 export interface ReceiptSubject extends CredentialSubject {
-  parentAssetId: string;
+  /** A content-addressed reference to what happened. The reference, never the thing. */
   artifactHash: string;
   verdict: "honoured" | "breached";
 }

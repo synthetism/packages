@@ -9,6 +9,7 @@
 export type {
   AgentIdentitySubject,
   AssetSubject,
+  AuthenticationSubject,
   AuthorizationSubject,
   CredentialSchema,
   CredentialStatus,
