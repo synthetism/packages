@@ -27,6 +27,16 @@ schema*.
 
 ## Frozen forever
 
+**The artifact is the language.** `schemas/query/v1.json` is the file a stranger fetches and
+the source of truth this package runs against; `src/languages/v1.generated.ts` is derived
+from it by `scripts/generate-language.ts`, and `test/version.test.ts` regenerates it and
+diffs. Edit the JSON, not the literal — `prebuild` regenerates it anyway.
+
+The direction is deliberate. Generating a schema *from* the TypeScript was measured and
+rejected (`SCHEMAS.md` §2): the generator emits draft-07, closes every object by default,
+and cannot express `minLength`/`minProperties` without annotations in comments. A schema
+that is too permissive admits junk silently; a literal that is out of date fails a test.
+
 `LANGUAGE_ADDRESS` sits inside every requirement ever signed, so it cannot be renamed. A
 change a `v1` reader cannot survive becomes `/v2` — v1 keeps resolving. Additive change
 lives inside v1: unknown fields are ignored, and the published schema leaves the object

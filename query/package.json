@@ -16,8 +16,9 @@
     "dist",
     "schemas",
     "README.md"
-  ],
-  "scripts": {
+  ],  "scripts": {
+    "schema:generate": "node scripts/generate-language.ts",
+    "prebuild": "npm run schema:generate",
     "build": "tsc -p tsconfig.json",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit -p tsconfig.test.json",

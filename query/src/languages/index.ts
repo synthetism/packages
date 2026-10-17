@@ -4,9 +4,18 @@
  * A version is added; none is ever removed. Credentials outlive deployments, so a package
  * that forgot how to read last year's requirement would be refusing documents its own
  * users signed — which is the one failure nobody downstream can fix.
+ *
+ * The languages themselves are **artifacts**, not code. `schemas/query/v1.json` is the file
+ * a stranger fetches and the address inside every requirement ever signed, so it is the
+ * source of truth, and `v1.generated.ts` is derived from it by `scripts/generate-language.ts`.
+ * Editing the generated file is editing a build product.
+ *
+ * `match` is a **JSON Schema applied to `credentialSubject`**, not a vocabulary of our own.
+ * That is the whole reason the language is data: v2 widens the language by publishing a
+ * wider schema, and nothing we invented has to be extended, frozen or taken back.
  */
 
-import { V1, V1_ADDRESS } from "./v1.js";
+import { V1, V1_ADDRESS } from "./v1.generated.js";
 
 export type LanguageSchema = Record<string, unknown>;
 
