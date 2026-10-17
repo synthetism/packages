@@ -24,7 +24,7 @@
 // The port comes from below, not from beside: compiling a schema is not a requirement-shaped
 // job, and the next spec that needs one must not inherit this language to get it.
 import type { SchemaEngine } from "@synthetism/schema-engine";
-import { LANGUAGES, type LanguageSchema } from "./languages/index.js";
+import { LANGUAGES, type Language } from "./languages/index.js";
 
 export type FailureReason =
   /**
@@ -73,7 +73,7 @@ export interface ValidateInput<C = unknown> {
   holder: string;
   engine: SchemaEngine;
   /** Override the shipped languages — for a v2 that has not shipped, or a test. */
-  languages?: Readonly<Record<string, LanguageSchema>>;
+  languages?: Readonly<Record<string, Language>>;
   /**
    * Judge only these requirement keys.
    *
@@ -110,8 +110,9 @@ export function validate<C = unknown>(input: ValidateInput<C>): Verdict {
     return { ok: false, failures };
   }
 
-  const requirement = asRecord(document?.credentialSubject)?.requirement;
-  const compiled = input.engine.compile(language);
+  const subject = asRecord(document?.credentialSubject);
+  const requirement = language.interpreter.locate(subject);
+  const compiled = input.engine.compile(language.schema);
 
   // An unusable *language* is ours to own, not the caller's: they cited our address and we
   // shipped a schema our own compiler rejects.
@@ -127,32 +128,19 @@ export function validate<C = unknown>(input: ValidateInput<C>): Verdict {
     return { ok: false, failures };
   }
 
-  const specs = asRecord(asRecord(requirement)?.requirements);
-
-  // A language the registry knows but this reader cannot *judge* is a refusal, not an empty
-  // requirement. Iterating zero keys because `requirements` was somewhere else reported `ok`
-  // for a v2 document against which nothing at all was held — measured, and the worst answer
-  // available: a server admitting a caller it never checked.
+  // Where the requirement lives and what shape it has is the language's business — the only
+  // thing a language is allowed to know. Everything below is the single implementation of
+  // what "satisfies" means, and it is the same for every language.
   //
-  // v1 cannot reach this: its schema requires a non-empty `requirements` map, so passing the
-  // conformance check above guarantees one. Only a *different* language lands here, which is
-  // the whole point — the reader says what it can do instead of guessing.
-  if (specs === undefined) {
-    fail(
-      "$",
-      "unsupported-language",
-      `${address} is registered, but its requirement is not shaped in a way this reader can judge`,
-    );
-    return { ok: false, failures };
-  }
+  // This replaces a hardcoded `credentialSubject.requirement.requirements` walk: a v2 whose
+  // demands were an array under `config` conformed to its own schema and then iterated zero
+  // keys, reporting `ok` against a requirement nothing had been checked against.
+  for (const demand of language.interpreter.read(requirement)) {
+    const { key, type } = demand;
 
-  for (const [key, raw] of Object.entries(specs)) {
     if (input.only !== undefined && !input.only.includes(key)) continue;
 
-    const spec = asRecord(raw) ?? {};
-    const type = typeof spec.type === "string" ? spec.type : undefined;
-
-    if (type === undefined) {
+    if (type === "") {
       fail(key, "malformed-requirement", "the requirement names no type");
       continue;
     }
@@ -162,7 +150,7 @@ export function validate<C = unknown>(input: ValidateInput<C>): Verdict {
 
     if (mine.length === 0) {
       // Optional and absent is not a failure — that is what `required: false` is for.
-      if (spec.required === false) continue;
+      if (!demand.required) continue;
 
       // Distinguish "you have none" from "you offered somebody else's", because the
       // second is a bug in the caller and the first is a fact about the caller.
@@ -179,7 +167,7 @@ export function validate<C = unknown>(input: ValidateInput<C>): Verdict {
       continue;
     }
 
-    const match = asRecord(spec.match);
+    const match = demand.match;
 
     if (match !== undefined) {
       const compiledMatch = input.engine.compile(match);

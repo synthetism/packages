@@ -15,16 +15,30 @@
  * wider schema, and nothing we invented has to be extended, frozen or taken back.
  */
 
+import type { LanguageInterpreter } from "../interpreter.js";
+import { V1_INTERPRETER } from "./v1.interpreter.js";
 import { V1, V1_ADDRESS } from "./v1.generated.js";
 
-export type LanguageSchema = Record<string, unknown>;
+/**
+ * One language: the artifact that says whether a document conforms, and the reader that says
+ * what it demands.
+ *
+ * They are one entry because they are one contract — the schema has already compiled the
+ * document before `read` is called, so `read` **trusts** it and never re-validates. A schema
+ * with no reader is a language nobody can judge; a reader with no schema is a guess about a
+ * document that may not conform.
+ */
+export interface Language {
+  schema: Record<string, unknown>;
+  interpreter: LanguageInterpreter;
+}
 
 /** The address a new requirement is written against. The newest one this package speaks. */
 export const LANGUAGE_ADDRESS = V1_ADDRESS;
 
 /** Address → the language itself. Add to this; never take away. */
-export const LANGUAGES: Readonly<Record<string, LanguageSchema>> = {
-  [V1_ADDRESS]: V1,
+export const LANGUAGES: Readonly<Record<string, Language>> = {
+  [V1_ADDRESS]: { schema: V1, interpreter: V1_INTERPRETER },
 };
 
 /**

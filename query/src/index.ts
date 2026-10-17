@@ -29,8 +29,13 @@ export {
   LANGUAGE_ADDRESS,
   LANGUAGE_CREDENTIAL_SCHEMA,
   LANGUAGES,
-  type LanguageSchema,
+  type Language,
 } from "./languages/index.js";
+
+// The seam between a language and the judge. Exported because a v2 that has not shipped is
+// registered by its consumer, and because a language with no reader is a language nobody can
+// judge — the type is how that is enforced rather than hoped for.
+export type { Demand, LanguageInterpreter } from "./interpreter.js";
 
 export type {
   RequirementSpec,

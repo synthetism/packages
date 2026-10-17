@@ -90,7 +90,7 @@ describe("the ajv engine", () => {
   });
 
   it("★ our own language compiles under strict", () => {
-    const compiled = ajvEngine().compile(LANGUAGES[LANGUAGE_ADDRESS] as Record<string, unknown>);
+    const compiled = ajvEngine().compile(LANGUAGES[LANGUAGE_ADDRESS]?.schema as Record<string, unknown>);
 
     expect(compiled.ok).toBe(true);
   });

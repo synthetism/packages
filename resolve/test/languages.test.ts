@@ -49,7 +49,38 @@ const V2: Record<string, unknown> = {
 };
 
 const v1Only = { [LANGUAGE_ADDRESS]: LANGUAGES[LANGUAGE_ADDRESS] };
-const bothLanguages = { ...v1Only, [V2_ADDRESS]: V2 };
+
+/**
+ * The half that makes v2 *readable*, and the reason it used to be judged by nobody.
+ *
+ * A language is a schema and a reader. Without the reader, `validate` had to walk a shape it
+ * assumed — v1's — and v2 fell through with zero demands. Here the reader is 6 lines, and it
+ * is the only new code v2 needs: where the demands are (`config`), and what they are.
+ */
+const v2Interpreter = {
+  locate: (subject: unknown) =>
+    typeof subject === "object" && subject !== null
+      ? (subject as Record<string, unknown>).requirement
+      : undefined,
+  read: (requirement: unknown) => {
+    const config = (requirement as { config?: unknown } | undefined)?.config;
+    if (!Array.isArray(config)) return [];
+
+    // An array has no names. `key` is the index as a string — good enough to cite a refusal,
+    // and a question v2 has to answer properly if it ever ships.
+    return config.map((entry, index) => {
+      const spec = entry as { type?: unknown; match?: Record<string, unknown> };
+      return {
+        key: String(index),
+        type: typeof spec.type === "string" ? spec.type : "",
+        required: true,
+        ...(spec.match === undefined ? {} : { match: spec.match }),
+      };
+    });
+  },
+};
+
+const bothLanguages = { ...v1Only, [V2_ADDRESS]: { schema: V2, interpreter: v2Interpreter } };
 
 const held = [credential({ holder: ALICE, type: "AuthorizationCredential", subject: { resource: "pool" } })];
 
@@ -100,7 +131,7 @@ describe("speaking more than one language", () => {
     expect(verdict.failures[0]?.key).toBe("$");
   });
 
-  it("★ registering a second language does not disturb the first, and is never judged by guesswork", () => {
+  it("★ a second language is judged once it brings a reader, and needs no new judge", () => {
     // The coexistence claim, in one test: the same client, both languages, both documents.
     const v1 = validate({
       document: v1Document,
@@ -110,7 +141,7 @@ describe("speaking more than one language", () => {
       languages: bothLanguages,
     });
 
-    const v2 = validate({
+    const v2Satisfied = validate({
       document: v2Document,
       credentials: held,
       holder: ALICE,
@@ -118,20 +149,23 @@ describe("speaking more than one language", () => {
       languages: bothLanguages,
     });
 
-    expect(v1.ok).toBe(true);
+    // And the assertion that proves it is *judging* rather than merely accepting: take the
+    // credential away and v2 must refuse. Before the reader existed, this passed with zero
+    // demands iterated — `ok` against a requirement nothing had been checked against.
+    const v2Unsatisfied = validate({
+      document: v2Document,
+      credentials: [],
+      holder: ALICE,
+      engine,
+      languages: bothLanguages,
+    });
 
-    // v2 conforms to its own schema, but this reader cannot *judge* it — its requirements are
-    // an array under `config`, and this code enumerates a `requirements` map. It used to
-    // return `ok: true` here after iterating zero keys, which reported a pass against a
-    // document nothing had been checked against. A language the reader knows but cannot
-    // evaluate is a refusal, and it says so rather than guessing.
-    expect(v2.ok).toBe(false);
-    expect(v2.failures).toEqual([
-      {
-        key: "$",
-        reason: "unsupported-language",
-        detail: `${V2_ADDRESS} is registered, but its requirement is not shaped in a way this reader can judge`,
-      },
+    expect(v1.ok).toBe(true);
+    expect(v2Satisfied.ok).toBe(true);
+
+    expect(v2Unsatisfied.ok).toBe(false);
+    expect(v2Unsatisfied.failures).toEqual([
+      { key: "0", reason: "no-credential", detail: "nothing of type AuthorizationCredential" },
     ]);
   });
 
