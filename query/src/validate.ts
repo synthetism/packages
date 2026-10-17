@@ -27,7 +27,13 @@ import type { SchemaEngine } from "@synthetism/schema-engine";
 import { LANGUAGES, type LanguageSchema } from "./languages/index.js";
 
 export type FailureReason =
-  /** The document is written in a language this reader does not implement. */
+  /**
+   * The document is written in a language this reader does not implement — either the
+   * address is unknown, or it is known and its requirement is not shaped in a way this
+   * reader can judge. Why it is one reason and not two: every caller does the same thing
+   * with it (stop, do not present, tell the user the client is behind), and `detail`
+   * carries which of the two it was. A reason is for branching, not for narrating.
+   */
   | "unsupported-language"
   /** The document claims a language it does not conform to. */
   | "malformed-requirement"
@@ -121,7 +127,24 @@ export function validate<C = unknown>(input: ValidateInput<C>): Verdict {
     return { ok: false, failures };
   }
 
-  const specs = asRecord(asRecord(requirement)?.requirements) ?? {};
+  const specs = asRecord(asRecord(requirement)?.requirements);
+
+  // A language the registry knows but this reader cannot *judge* is a refusal, not an empty
+  // requirement. Iterating zero keys because `requirements` was somewhere else reported `ok`
+  // for a v2 document against which nothing at all was held — measured, and the worst answer
+  // available: a server admitting a caller it never checked.
+  //
+  // v1 cannot reach this: its schema requires a non-empty `requirements` map, so passing the
+  // conformance check above guarantees one. Only a *different* language lands here, which is
+  // the whole point — the reader says what it can do instead of guessing.
+  if (specs === undefined) {
+    fail(
+      "$",
+      "unsupported-language",
+      `${address} is registered, but its requirement is not shaped in a way this reader can judge`,
+    );
+    return { ok: false, failures };
+  }
 
   for (const [key, raw] of Object.entries(specs)) {
     if (input.only !== undefined && !input.only.includes(key)) continue;

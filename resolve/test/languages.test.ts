@@ -100,7 +100,7 @@ describe("speaking more than one language", () => {
     expect(verdict.failures[0]?.key).toBe("$");
   });
 
-  it("★ registering a second language does not disturb the first", () => {
+  it("★ registering a second language does not disturb the first, and is never judged by guesswork", () => {
     // The coexistence claim, in one test: the same client, both languages, both documents.
     const v1 = validate({
       document: v1Document,
@@ -119,7 +119,20 @@ describe("speaking more than one language", () => {
     });
 
     expect(v1.ok).toBe(true);
-    expect(v2.ok).toBe(true);
+
+    // v2 conforms to its own schema, but this reader cannot *judge* it — its requirements are
+    // an array under `config`, and this code enumerates a `requirements` map. It used to
+    // return `ok: true` here after iterating zero keys, which reported a pass against a
+    // document nothing had been checked against. A language the reader knows but cannot
+    // evaluate is a refusal, and it says so rather than guessing.
+    expect(v2.ok).toBe(false);
+    expect(v2.failures).toEqual([
+      {
+        key: "$",
+        reason: "unsupported-language",
+        detail: `${V2_ADDRESS} is registered, but its requirement is not shaped in a way this reader can judge`,
+      },
+    ]);
   });
 
   it("an unknown address with no language at all is still a language failure, never a pass", () => {
