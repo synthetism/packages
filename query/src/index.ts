@@ -11,8 +11,10 @@
  *
  * | | |
  * |---|---|
- * | `LANGUAGE_SCHEMA` | which **language** the document is written in — carried in `credentialSchema.id`, frozen per major |
+ * | `LANGUAGE_SCHEMA` | which **language** the document is written in — frozen per major, the same for everybody |
  * | `requirement.version` | the **service's** revision of its own requirement — changes whenever it changes its mind |
+ *
+ * `createRequirement` owns the first; the caller owns the second.
  */
 
 export type {
@@ -23,3 +25,9 @@ export type {
 } from "./types.js";
 
 export { LANGUAGE_SCHEMA, LANGUAGE_VERSION } from "./language.js";
+
+export {
+  LANGUAGE_SCHEMA_TYPE,
+  createRequirement,
+  type CreateRequirementArgs,
+} from "./requirement.js";
