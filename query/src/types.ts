@@ -9,7 +9,7 @@
  * Producers are version-locked by design. Consumers must be version-agnostic. Conflating
  * those two is how a protocol ends up with a package that can only read its own output.
  *
- * **This package imports nothing.** The subject below is defined here rather than borrowed
+ * **This file imports nothing.** The subject below is defined here rather than borrowed
  * from `@synthetism/credential`, because the language should be readable by anyone — a
  * directory of JSON and the addresses it answers at — and an import would make installing a
  * credential format a precondition for reading a requirement.

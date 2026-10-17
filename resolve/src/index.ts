@@ -13,6 +13,4 @@
  * `@synthetism/engine-ajv` — or hand it a stub.
  */
 
-export type { Compiled, SchemaEngine } from "@synthetism/query";
-
 export { resolve, type Candidate, type Resolution } from "./resolve.js";

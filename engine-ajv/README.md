@@ -2,9 +2,10 @@
 
 **The one JSON Schema implementation in the stack.**
 
-`@synthetism/query` ships the language and asks for a compiler it does not carry. Everything
-in the core takes an engine as a parameter. This is the engine — so the choice of `ajv` is
-made once, in an adapter, and no domain package inherits it.
+`@synthetism/schema-engine` owns the port; everything in the core takes an engine as a
+parameter. This is the engine — so the choice of `ajv` is made once, in an adapter, and no
+domain package inherits it. It depends on the port and on `ajv`, and on nothing else: you can
+adopt it without having heard of a requirement.
 
 ```ts
 import { ajvEngine } from "@synthetism/engine-ajv";
@@ -51,4 +52,5 @@ credential's subject. They are off, so a requirement's meaning never depends on 
 registry that was not versioned alongside it.
 
 `@synthetism/query`'s own language schema compiles under these rules — a test asserts it — so
-strictness costs nothing we authored.
+strictness costs nothing we authored. That test is the only reason this package has `query` as
+a devDependency; it ships with two dependencies and neither is a language.

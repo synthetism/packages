@@ -25,7 +25,9 @@
     "test:watch": "vitest",
     "prepublishOnly": "npm run clean && npm run typecheck && npm run test && npm run build"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@synthetism/schema-engine": "^0.1.0"
+  },
   "devDependencies": {
     "@synthetism/credential": "^1.0.0",
     "@synthetism/did": "^1.0.0",

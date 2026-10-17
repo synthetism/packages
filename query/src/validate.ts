@@ -21,7 +21,9 @@
  * reason anyone could act on. The shape stays generic; the caller keeps its own type.
  */
 
-import type { SchemaEngine } from "./engine.js";
+// The port comes from below, not from beside: compiling a schema is not a requirement-shaped
+// job, and the next spec that needs one must not inherit this language to get it.
+import type { SchemaEngine } from "@synthetism/schema-engine";
 import { LANGUAGES, type LanguageSchema } from "./languages/index.js";
 
 export type FailureReason =

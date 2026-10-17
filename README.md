@@ -1,6 +1,6 @@
 # synthetism — the SSI stack
 
-**The primitives, the format, the language, the ports, and one engine.** Nine packages, one
+**The primitives, the format, the language, the ports, and one engine.** Ten packages, one
 repository.
 
 | package | what it is |
@@ -11,7 +11,8 @@ repository.
 | `@synthetism/vc` | issue and verify a credential — **owns the port** `ISigner` |
 | `@synthetism/vp` | present and verify a presentation — the holder's proof, inside the verifier's challenge |
 | `@synthetism/signer` | the in-process signer — conforms to `ISigner` without depending on it |
-| `@synthetism/query` | what a service requires, as data — the language, `validate`, and **owns the port** `SchemaEngine` |
+| `@synthetism/schema-engine` | **owns the port** `SchemaEngine` — types only, no code, no domain |
+| `@synthetism/query` | what a service requires, as data — the language and `validate` |
 | `@synthetism/resolve` | which of a holder's credentials could satisfy each key — candidates, not a choice |
 | `@synthetism/engine-ajv` | the one JSON Schema implementation in the stack, behind `SchemaEngine` |
 
@@ -23,10 +24,14 @@ A port is owned by its lowest consumer, and **nothing depends on an implementati
 `implements ISigner`, so `@synthetism/vc` never reaches its published declarations — and
 `npm run check:dts -w @synthetism/signer` fails if it ever does.
 
-`query` owns `SchemaEngine` for the same reason: it ships the *language*, which a stranger
-must be able to read without adopting our dependency tree. `engine-ajv` is the only package
-that knows what `ajv` is, and `resolve` takes an engine as a parameter rather than importing
-one. A port a consumer is forced to install has stopped being a port.
+`SchemaEngine` is owned by `schema-engine` because it has **more than one consumer**: `query`
+judges a requirement with it, and the next spec will judge something else. Putting it below
+both means `engine-ajv` can be adopted by somebody who has never heard of a requirement, and a
+change to the port is a `schema-engine` major rather than a lie about the language's address.
+
+`schema-engine` is **types, forever** — no default engine, no `isOk()` helper, no convenience
+wrapper. A port package that grows a function with a body has become a hub. `engine-ajv` is the
+only package that knows what `ajv` is; `resolve` takes an engine as a parameter.
 
 ## Working here
 
@@ -39,9 +44,9 @@ npm run typecheck
 npm test
 ```
 
-**`build` runs in dependency order** — `keys → did → credential → query → resolve →
-engine-ajv → vc → vp → signer` — because a dependant resolves its sibling's `dist`. Repo-wide
-`typecheck` and `test` are order-independent and run with `--workspaces --if-present`.
+**`build` runs in dependency order** — `keys → did → credential → schema-engine → query →
+resolve → engine-ajv → vc → vp → signer` — because a dependant resolves its sibling's `dist`.
+Repo-wide `typecheck` and `test` are order-independent and run with `--workspaces --if-present`.
 
 Each package keeps its own `package.json`, `README.md`, `tsconfig.json`,
 `tsconfig.test.json`, `vitest.config.ts`, `src/` and `test/`, and extends `tsconfig.base.json`

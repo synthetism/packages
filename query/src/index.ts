@@ -21,7 +21,9 @@
  * to be. `validate` is the second door.
  */
 
-export type { Compiled, SchemaEngine } from "./engine.js";
+// The port is re-exported, not owned: `@synthetism/schema-engine` sits below the language
+// because the next spec will need the same seam for something that is not a requirement.
+export type { Compiled, SchemaEngine } from "@synthetism/schema-engine";
 
 export {
   LANGUAGE_ADDRESS,

@@ -8,9 +8,10 @@ a shape that is not ours to change; a requirement is a document a service publis
 because a package's version is a promise about everything inside it: a change to the
 language must not read as a change to the presentation protocol.
 
-**This package has no dependencies.** It imports nothing, and its declarations name nothing
-outside itself. The language is readable — and adoptable — without our envelope, our crypto
-or our signing path.
+**No third-party dependencies, and one sibling.** It imports `@synthetism/schema-engine` —
+a port with types and no code — and nothing else. The language is readable without our
+envelope, our crypto or our signing path; the one thing it borrows is a shape it cannot own,
+and that shape is a type.
 
 ## Two versions, two jobs
 
