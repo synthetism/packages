@@ -120,7 +120,7 @@ describe("the query language", () => {
   it("★ forgetting the address is a named failure, not a silent one", () => {
     // The trade this split makes: the address is a constant now, so it can be omitted. That
     // is survivable only because omitting it is loud — which is what `unsupported-language`
-    // with "names no credentialSchema.id" is for. Asserted in @synthetism/utils.
+    // with "names no credentialSchema.id" is for. Asserted in @synthetism/resolve.
     expect(LANGUAGE_CREDENTIAL_SCHEMA.id).toBe(LANGUAGE_ADDRESS);
     expect(LANGUAGE_CREDENTIAL_SCHEMA.id).not.toContain("v3");
   });

@@ -103,7 +103,16 @@ export function validate<C = unknown>(input: ValidateInput<C>): Verdict {
   }
 
   const requirement = asRecord(document?.credentialSubject)?.requirement;
-  const conforms = input.engine.compile(language)(requirement);
+  const compiled = input.engine.compile(language);
+
+  // An unusable *language* is ours to own, not the caller's: they cited our address and we
+  // shipped a schema our own compiler rejects.
+  if ("error" in compiled) {
+    fail("$", "malformed-requirement", compiled.error);
+    return { ok: false, failures };
+  }
+
+  const conforms = compiled.run(requirement);
 
   if (conforms !== true) {
     fail("$", "malformed-requirement", conforms.join("; "));
@@ -148,7 +157,17 @@ export function validate<C = unknown>(input: ValidateInput<C>): Verdict {
     const match = asRecord(spec.match);
 
     if (match !== undefined) {
-      const judged = input.engine.compile(match)(asRecord(mine[0])?.credentialSubject);
+      const compiledMatch = input.engine.compile(match);
+
+      // A `match` that is not a schema is the **requirement** being broken — `scope: [...]`
+      // where a schema belongs, say. Reporting `not-a-match` would tell the client its
+      // credential was wrong when the service published something no one can satisfy.
+      if ("error" in compiledMatch) {
+        fail(key, "malformed-requirement", compiledMatch.error);
+        continue;
+      }
+
+      const judged = compiledMatch.run(asRecord(mine[0])?.credentialSubject);
 
       if (judged !== true) {
         fail(key, "not-a-match", judged.join("; "));

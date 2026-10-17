@@ -90,7 +90,8 @@ holder presenting it; and `match` holds. `resource` is not a parameter — it is
 condition that authorisation requirements happen to use. The library knows the mechanism;
 the vocabulary belongs to whoever writes the requirement.
 
-The engine is injected. `@synthetism/utils` provides one over `ajv`.
+The engine is injected. `@synthetism/engine-ajv` provides one over `ajv`; `@synthetism/resolve`
+composes `validate` with it.
 
 ## Two audiences, two doors
 

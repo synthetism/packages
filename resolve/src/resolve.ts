@@ -15,7 +15,6 @@
 import {
   type Failure,
   LANGUAGE_ADDRESS,
-  type SchemaEngine,
   type ValidateInput,
   type Verdict,
   validate,

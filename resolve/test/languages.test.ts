@@ -8,7 +8,7 @@
 
 import { LANGUAGE_ADDRESS, LANGUAGES, validate } from "@synthetism/query";
 import { describe, expect, it } from "vitest";
-import { ajvEngine } from "../src/index.js";
+import { ajvEngine } from "@synthetism/engine-ajv";
 import { ALICE, credential, requirement, resourceMatch } from "./fixtures.js";
 
 const engine = ajvEngine();

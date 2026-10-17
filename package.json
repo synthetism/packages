@@ -2,10 +2,10 @@
   "name": "synthetism",
   "private": true,
   "version": "1.0.0",
-  "description": "The SSI stack — keys, did, credential, query, utils, vc, vp, signer. One repository; npm workspaces only.",
-  "workspaces": ["keys", "did", "credential", "query", "utils", "vc", "vp", "signer"],
+  "description": "The SSI stack — keys, did, credential, query, resolve, engine-ajv, vc, vp, signer. One repository; npm workspaces only.",
+  "workspaces": ["keys", "did", "credential", "query", "resolve", "engine-ajv", "vc", "vp", "signer"],
   "scripts": {
-    "build": "npm run build -w @synthetism/keys && npm run build -w @synthetism/did && npm run build -w @synthetism/credential && npm run build -w @synthetism/query && npm run build -w @synthetism/vc && npm run build -w @synthetism/vp && npm run build -w @synthetism/utils && npm run build -w @synthetism/signer",
+    "build": "npm run build -w @synthetism/keys && npm run build -w @synthetism/did && npm run build -w @synthetism/credential && npm run build -w @synthetism/query && npm run build -w @synthetism/resolve && npm run build -w @synthetism/engine-ajv && npm run build -w @synthetism/vc && npm run build -w @synthetism/vp && npm run build -w @synthetism/signer",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "lint": "biome lint .",

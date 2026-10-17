@@ -21,7 +21,7 @@
  * to be. `validate` is the second door.
  */
 
-export type { SchemaEngine } from "./engine.js";
+export type { Compiled, SchemaEngine } from "./engine.js";
 
 export {
   LANGUAGE_ADDRESS,
