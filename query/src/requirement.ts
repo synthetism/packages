@@ -1,32 +1,21 @@
 /**
- * Build a requirement the way `createUnsigned` builds a credential.
+ * Build a requirement — and stop at the subject.
  *
- * The caller supplies the **content** — what it demands and its own revision — and this
- * owns the **envelope**: the credential type, the issuer, and above all the
- * `credentialSchema.id`.
+ * The caller supplies the **content**: what it demands, and its own revision. This owns the
+ * language, because a service has only one version to hand and it is the wrong one.
  *
- * That last part is why this function exists. A service writing its own
- * `credentialSchema` has to put *a* version in the address, and the only version it has
- * to hand is its own — so it writes `.../v3` and claims a language version that does not
- * exist. The service cannot know the language version, exactly as it cannot know
- * `@context`, so it should not be able to name either. Here it names neither.
+ * It does **not** build a credential. Whether this subject is signed into one, wrapped, or
+ * thrown away is the app's business, and `@synthetism/credential` is where that envelope
+ * lives. So this package returns **shape, not artifact** — and composition stays in the app,
+ * which is the one place it belongs.
+ *
+ * The consequence, stated plainly: the language address is no longer inexpressible here. It
+ * is a constant the app passes (`LANGUAGE_CREDENTIAL_SCHEMA`), so it can be forgotten.
+ * Forgetting it is caught — `validate` reports `unsupported-language` by name, at the first
+ * moment anyone looks at the document. That is a better trade than an import from the format.
  */
 
-import {
-  type Holder,
-  type UnsignedCredential,
-  createUnsigned,
-} from "@synthetism/credential";
-import { LANGUAGE_ADDRESS } from "./languages/index.js";
 import type { RequirementSpec, RequirementSubject } from "./types.js";
-
-/**
- * The schema type the address points at.
- *
- * A constant rather than an argument, for the same reason as the address: it is part of
- * the envelope, and the envelope is not the caller's to choose.
- */
-export const LANGUAGE_SCHEMA_TYPE = "JsonSchemaValidator2018";
 
 export interface CreateRequirementArgs {
   /** The requirement's name, e.g. `"market-read"`. */
@@ -35,29 +24,27 @@ export interface CreateRequirementArgs {
   version: string;
   /** For the human reading the 401. */
   description?: string;
-  /** Values the *service* fixes, so a caller does not have to guess them. */
+  /** What is on sale. Informational: nothing in the library reads it. */
   parameters?: Record<string, unknown>;
   /** Keyed by purpose — the content. */
   requirements: Record<string, RequirementSpec>;
-  /** The service making the claim: `holder` and `issuer` are the same party. */
-  issuer: Holder;
-  id?: string;
-  context?: string[];
-  validity?: { from?: string; until?: string };
+  /** The service making the claim: the subject's `holder`, and the credential's `issuer`. */
+  issuer: { id: string; name?: string; [x: string]: unknown };
 }
 
 /**
- * An unsigned `RequirementCredential`, ready for `issue`.
+ * A `RequirementSubject`, ready to be wrapped:
  *
- * Unsigned on purpose, exactly like `createUnsigned`: this package has no crypto and no
- * signer, and the service's own key signs its own requirement.
- *
- * There is **no** `credentialSchema` argument. The address is the language's, it is the
- * same for every service, and a caller that could pass one could pass a wrong one.
+ * ```ts
+ * createUnsigned({
+ *   subject: createRequirement({ name, version, requirements, issuer }),
+ *   type: "RequirementCredential",
+ *   issuer,
+ *   credentialSchema: LANGUAGE_CREDENTIAL_SCHEMA,
+ * })
+ * ```
  */
-export function createRequirement(
-  args: CreateRequirementArgs,
-): UnsignedCredential<RequirementSubject> {
+export function createRequirement(args: CreateRequirementArgs): RequirementSubject {
   if (args.name.trim() === "") {
     throw new Error("a requirement needs a name — it is how a refusal cites it");
   }
@@ -72,23 +59,14 @@ export function createRequirement(
     throw new Error("a requirement needs its own version — it changes on your schedule");
   }
 
-  return createUnsigned<RequirementSubject>({
-    subject: {
-      holder: args.issuer,
-      requirement: {
-        name: args.name,
-        version: args.version,
-        ...(args.description === undefined ? {} : { description: args.description }),
-        ...(args.parameters === undefined ? {} : { parameters: args.parameters }),
-        requirements: args.requirements,
-      },
+  return {
+    holder: args.issuer,
+    requirement: {
+      name: args.name,
+      version: args.version,
+      ...(args.description === undefined ? {} : { description: args.description }),
+      ...(args.parameters === undefined ? {} : { parameters: args.parameters }),
+      requirements: args.requirements,
     },
-    type: "RequirementCredential",
-    issuer: args.issuer,
-    // The language's address, never the service's revision.
-    credentialSchema: { id: LANGUAGE_ADDRESS, type: LANGUAGE_SCHEMA_TYPE },
-    ...(args.id === undefined ? {} : { id: args.id }),
-    ...(args.context === undefined ? {} : { context: args.context }),
-    ...(args.validity === undefined ? {} : { validity: args.validity }),
-  });
+  };
 }

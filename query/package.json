@@ -25,10 +25,9 @@
     "test:watch": "vitest",
     "prepublishOnly": "npm run clean && npm run typecheck && npm run test && npm run build"
   },
-  "dependencies": {
-    "@synthetism/credential": "^1.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@synthetism/credential": "^1.0.0",
     "@synthetism/did": "^1.0.0",
     "@synthetism/keys": "^1.0.0",
     "@synthetism/vc": "^1.0.0",

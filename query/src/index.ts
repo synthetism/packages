@@ -23,7 +23,12 @@
 
 export type { SchemaEngine } from "./engine.js";
 
-export { LANGUAGE_ADDRESS, LANGUAGES, type LanguageSchema } from "./languages/index.js";
+export {
+  LANGUAGE_ADDRESS,
+  LANGUAGE_CREDENTIAL_SCHEMA,
+  LANGUAGES,
+  type LanguageSchema,
+} from "./languages/index.js";
 
 export type {
   RequirementSpec,
@@ -32,7 +37,6 @@ export type {
 } from "./types.js";
 
 export {
-  LANGUAGE_SCHEMA_TYPE,
   createRequirement,
   type CreateRequirementArgs,
 } from "./requirement.js";

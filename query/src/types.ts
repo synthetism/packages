@@ -8,9 +8,12 @@
  *
  * Producers are version-locked by design. Consumers must be version-agnostic. Conflating
  * those two is how a protocol ends up with a package that can only read its own output.
+ *
+ * **This package imports nothing.** The subject below is defined here rather than borrowed
+ * from `@synthetism/credential`, because the language should be readable by anyone — a
+ * directory of JSON and the addresses it answers at — and an import would make installing a
+ * credential format a precondition for reading a requirement.
  */
-
-import type { CredentialSubject } from "@synthetism/credential";
 
 /** One thing a verifier demands: a credential of this `type`, held to this schema. */
 export interface RequirementSpec {
@@ -45,13 +48,18 @@ export interface VPLanguageSchema {
 }
 
 /**
- * A published requirement: the language, signed by the service that will enforce it.
+ * The subject a requirement is published in — **the language's own shape**.
  *
- * `holder` is the service — the same party as `issuer`. That is not redundant: a
- * requirement is a statement a service makes about itself, and a caller verifies it exactly
- * as it verifies anything else.
+ * Structurally this is what a `CredentialSubject` looks like (a `holder` with an `id`), and
+ * deliberately not an import of it. The format's rule is that *some* holder owns the claims;
+ * this says what that holder is holding. Two statements, two packages, no dependency.
+ *
+ * `holder` is the service — the same party as the credential's `issuer`. Not redundant: a
+ * requirement is a statement a service makes about *itself*, which is why a caller verifies
+ * it exactly as it verifies anything else.
  */
-export interface RequirementSubject extends CredentialSubject {
+export interface RequirementSubject {
+  holder: { id: string; name?: string; [x: string]: unknown };
   /** The requirement itself. Its shape is the language's; this says only that one is here. */
   requirement: VPLanguageSchema;
 }

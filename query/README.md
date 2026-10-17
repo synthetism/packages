@@ -1,49 +1,104 @@
 # @synthetism/query
 
-**What a service requires, as data — and the version its address is frozen at.**
+**What a service requires, as data — and the shape that data is written in.**
 
-The other half of the exchange from `@synthetism/vp`. A presentation is a W3C standard
-with a shape that is not ours to change; a requirement is a document a service publishes
-about *itself*, and it will keep changing. They were designed together and they live
-apart, because a package's version is a promise about everything inside it: a change to
-the language must not read as a change to the presentation protocol.
+The other half of the exchange from `@synthetism/vp`. A presentation is a W3C standard with
+a shape that is not ours to change; a requirement is a document a service publishes about
+*itself*, and it will keep changing. They were designed together and they live apart,
+because a package's version is a promise about everything inside it: a change to the
+language must not read as a change to the presentation protocol.
+
+**This package has no dependencies.** It imports nothing, and its declarations name nothing
+outside itself. The language is readable — and adoptable — without our envelope, our crypto
+or our signing path.
 
 ## Two versions, two jobs
 
-| | | |
+| export | value | what it means |
 |---|---|---|
-| `LANGUAGE_SCHEMA` | `https://synthetism.org/schemas/query/v1` | which **language** the document is written in. Carried in `credentialSchema.id`, frozen per major |
-| `requirement.version` | e.g. `"3"` | the **service's** revision of its own requirement. Changes whenever it changes its mind |
+| `LANGUAGE_ADDRESS` | `https://synthetism.org/schemas/query/v1` | which **language** the document is written in. Frozen per major |
+| `LANGUAGE_CREDENTIAL_SCHEMA` | `{ id: LANGUAGE_ADDRESS, type: "JsonSchemaValidator2018" }` | the same thing, whole, as `credentialSchema`. Pass this object — not two strings you could get wrong |
+| `credentialSubject.requirement.version` | e.g. `"3"` | the **service's** revision of its own requirement. Changes whenever it changes its mind |
 
-Conflating them is the bug this package exists to prevent: a service bumping its
-requirement from 2 to 3 was claiming it now conformed to a *different schema*.
+Conflating the first two with the third is the bug this package exists to prevent: a
+service bumping its requirement from 2 to 3 was claiming it now conformed to a *different
+schema*.
 
 ## Frozen forever
 
-`LANGUAGE_SCHEMA` sits inside every requirement ever signed, so it cannot be renamed. A
+`LANGUAGE_ADDRESS` sits inside every requirement ever signed, so it cannot be renamed. A
 change a `v1` reader cannot survive becomes `/v2` — v1 keeps resolving. Additive change
 lives inside v1: unknown fields are ignored, and the published schema leaves the object
 open.
 
-`LANGUAGE_VERSION` is a literal, not a runtime read of `package.json` — the address has to
-be a published fact a stranger can implement against. A test asserts it equals the
-package's major, so a drift fails in CI rather than in a caller's refused request.
+`LANGUAGES` is add-only, and `@synthetism/query@N` ships a validator for every language
+`1..N`. Dropping one is a broken promise with a date on it.
 
-## What is here, and what is not
+## Authoring: a subject, not a credential
 
-- **here:** the language **as a schema** (`schemas/query/v1.json`), the addresses it is
-  published at, the authoring types for a service that ships this package, and `validate` —
-  the predicate that answers *does this set of credentials satisfy that requirement?*
-- **not here:** the resolver, the schema engine, and anything that picks. Selection is the
-  client's policy and lives in `@synthetism/utils`; the engine is injected, so this package
-  stays dependency-free.
+```ts
+import { createRequirement, LANGUAGE_CREDENTIAL_SCHEMA } from "@synthetism/query";
+import { createUnsigned } from "@synthetism/credential";
+
+const subject = createRequirement({
+  name: "market-read",
+  version: "3",                        // your revision — nothing to do with the language
+  requirements: {
+    authorization: {
+      type: "AuthorizationCredential",
+      required: true,
+      match: {                         // a JSON Schema, applied to credentialSubject
+        type: "object",
+        properties: { resource: { const: "https://api.example.com/market" } },
+        required: ["resource"],
+      },
+    },
+  },
+  issuer: { id: serviceDid },          // the holder, and the credential's issuer
+});
+
+const unsigned = createUnsigned({
+  subject,
+  type: "RequirementCredential",
+  issuer: { id: serviceDid },
+  credentialSchema: LANGUAGE_CREDENTIAL_SCHEMA,
+});
+```
+
+`createRequirement` returns a **`RequirementSubject`** — `{ holder, requirement }` — and
+stops there. The envelope is `@synthetism/credential`'s job and composition is the app's.
+The trade is honest: the address is a constant you pass, so it *can* be forgotten. It will
+not pass silently — `validate` reports `unsupported-language` and names the missing
+`credentialSchema.id`.
+
+## Judging: `validate`
+
+```ts
+validate({ document, credentials, holder, engine })  →  Verdict
+```
+
+Pure: no I/O, no network, no clock. A **predicate** — it does not select, rank, spend or
+verify a proof.
+
+**Two consumers, one function.** The service calls it to check a presentation against the
+requirement it published, so what it published and what it enforces cannot drift — same
+code, same document. The customer calls it *before* presenting, to check a credential it
+picked will be accepted.
+
+Three checks, subject-blind: the credential is of the required `type`; its subject is the
+holder presenting it; and `match` holds. `resource` is not a parameter — it is a `match`
+condition that authorisation requirements happen to use. The library knows the mechanism;
+the vocabulary belongs to whoever writes the requirement.
+
+The engine is injected. `@synthetism/utils` provides one over `ajv`.
 
 ## Two audiences, two doors
 
 A **service** ships this package, knows which language version it speaks, and writes its
-requirement with the authoring types. A **consumer** has a document off the wire and an
-address inside it, and asks *the schema* — never the types — whether it is the language it
-claims to be. Producers are version-locked by design; consumers must be version-agnostic.
+requirement with `createRequirement`. A **consumer** has a document off the wire and an
+address inside it, and asks *the registry* — never the authoring types — whether it is the
+language it claims to be. Producers are version-locked by design; consumers must be
+version-agnostic.
 
 ## The rule the language is guarded by
 

@@ -17,3 +17,17 @@ export const LANGUAGE_ADDRESS = V1_ADDRESS;
 export const LANGUAGES: Readonly<Record<string, LanguageSchema>> = {
   [V1_ADDRESS]: V1,
 };
+
+/**
+ * The `credentialSchema` that points at this language — the value an app passes to
+ * `createUnsigned`.
+ *
+ * Exported as an **object** rather than two strings on purpose. A caller that had to write
+ * `{ id: "…", type: "…" }` would have two opportunities to get it wrong and nothing to catch
+ * either; a frozen object can be passed or forgotten, and forgetting is caught — `validate`
+ * reports `unsupported-language` by name.
+ */
+export const LANGUAGE_CREDENTIAL_SCHEMA: { id: string; type: string } = {
+  id: LANGUAGE_ADDRESS,
+  type: "JsonSchemaValidator2018",
+};
