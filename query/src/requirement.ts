@@ -17,7 +17,7 @@ import {
   type UnsignedCredential,
   createUnsigned,
 } from "@synthetism/credential";
-import { LANGUAGE_SCHEMA } from "./language.js";
+import { LANGUAGE_ADDRESS } from "./languages/index.js";
 import type { RequirementSpec, RequirementSubject } from "./types.js";
 
 /**
@@ -86,7 +86,7 @@ export function createRequirement(
     type: "RequirementCredential",
     issuer: args.issuer,
     // The language's address, never the service's revision.
-    credentialSchema: { id: LANGUAGE_SCHEMA, type: LANGUAGE_SCHEMA_TYPE },
+    credentialSchema: { id: LANGUAGE_ADDRESS, type: LANGUAGE_SCHEMA_TYPE },
     ...(args.id === undefined ? {} : { id: args.id }),
     ...(args.context === undefined ? {} : { context: args.context }),
     ...(args.validity === undefined ? {} : { validity: args.validity }),

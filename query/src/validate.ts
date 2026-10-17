@@ -1,0 +1,168 @@
+/**
+ * `validate` — does this set of credentials satisfy that requirement?
+ *
+ * A **predicate**, and nothing else. It does not select, rank, spend or verify: which of
+ * several valid candidates to send is a policy, and a policy with no single right answer
+ * belongs to the app, not the library.
+ *
+ * It is subject-blind. Three checks — the type, the holder, and whatever `match` says —
+ * and no opinion about what an `authorisation` or a `receipt` is. The vocabulary lives in
+ * the requirement; the mechanism lives here.
+ *
+ * **Two consumers, one function.** A service calls it to check a presentation against the
+ * requirement it published, so the published requirement and the enforced check cannot
+ * drift — they are the same code reading the same document. A customer calls it before
+ * presenting, to know that a credential it picked will be accepted.
+ */
+
+import type { VerifiableCredential } from "@synthetism/credential";
+import type { SchemaEngine } from "./engine.js";
+import { LANGUAGES, type LanguageSchema } from "./languages/index.js";
+
+export type FailureReason =
+  /** The document is written in a language this reader does not implement. */
+  | "unsupported-language"
+  /** The document claims a language it does not conform to. */
+  | "malformed-requirement"
+  /** Nothing of the required type was offered. */
+  | "no-credential"
+  /** Two offered where the requirement asks for one. */
+  | "more-than-one"
+  /** Offered, but `match` said no. */
+  | "not-a-match"
+  /** Offered, but it belongs to somebody else. */
+  | "not-the-holder";
+
+export interface Failure {
+  /** The requirement key, or `$` for a failure about the document itself. */
+  key: string;
+  reason: FailureReason;
+  detail?: string;
+}
+
+export interface Verdict {
+  ok: boolean;
+  failures: Failure[];
+}
+
+export interface ValidateInput {
+  /** The requirement credential as parsed JSON — the address lives inside it. */
+  document: unknown;
+  /** What the caller has chosen to offer. One credential per requirement, ideally. */
+  credentials: readonly VerifiableCredential[];
+  /** The DID presenting. Every credential must belong to it. */
+  holder: string;
+  engine: SchemaEngine;
+  /** Override the shipped languages — for a v2 that has not shipped, or a test. */
+  languages?: Readonly<Record<string, LanguageSchema>>;
+  /**
+   * Judge only these requirement keys.
+   *
+   * Exists so that a resolver can ask "does *this one credential* satisfy *this one key*?"
+   * without reimplementing the judgement. There is one implementation of what conformance
+   * means, and everything else composes it.
+   */
+  only?: readonly string[];
+}
+
+export function validate(input: ValidateInput): Verdict {
+  const failures: Failure[] = [];
+  const fail = (key: string, reason: FailureReason, detail?: string): void => {
+    failures.push(detail === undefined ? { key, reason } : { key, reason, detail });
+  };
+
+  const document = asRecord(input.document);
+  const address = typeof asRecord(document?.credentialSchema)?.id === "string"
+    ? (asRecord(document?.credentialSchema)?.id as string)
+    : undefined;
+
+  // The address is a claim, not a reason to trust the bytes — but it is the *only* thing
+  // that says which language to check the bytes against, so no address is no language.
+  if (address === undefined) {
+    fail("$", "unsupported-language", "the document names no credentialSchema.id");
+    return { ok: false, failures };
+  }
+
+  const languages = input.languages ?? LANGUAGES;
+  const language = languages[address];
+
+  if (language === undefined) {
+    fail("$", "unsupported-language", address);
+    return { ok: false, failures };
+  }
+
+  const requirement = asRecord(document?.credentialSubject)?.requirement;
+  const conforms = input.engine.compile(language)(requirement);
+
+  if (conforms !== true) {
+    fail("$", "malformed-requirement", conforms.join("; "));
+    return { ok: false, failures };
+  }
+
+  const specs = asRecord(asRecord(requirement)?.requirements) ?? {};
+
+  for (const [key, raw] of Object.entries(specs)) {
+    if (input.only !== undefined && !input.only.includes(key)) continue;
+
+    const spec = asRecord(raw) ?? {};
+    const type = typeof spec.type === "string" ? spec.type : undefined;
+
+    if (type === undefined) {
+      fail(key, "malformed-requirement", "the requirement names no type");
+      continue;
+    }
+
+    const ofType = input.credentials.filter((credential) => typesOf(credential).includes(type));
+    const mine = ofType.filter((credential) => holderOf(credential) === input.holder);
+
+    if (mine.length === 0) {
+      // Optional and absent is not a failure — that is what `required: false` is for.
+      if (spec.required === false) continue;
+
+      // Distinguish "you have none" from "you offered somebody else's", because the
+      // second is a bug in the caller and the first is a fact about the caller.
+      if (ofType.length > 0) {
+        fail(key, "not-the-holder", `offered ${type} belonging to another holder`);
+      } else {
+        fail(key, "no-credential", `nothing of type ${type}`);
+      }
+      continue;
+    }
+
+    if (mine.length > 1) {
+      fail(key, "more-than-one", `${mine.length} credentials of type ${type}`);
+      continue;
+    }
+
+    const match = asRecord(spec.match);
+
+    if (match !== undefined) {
+      const judged = input.engine.compile(match)(asRecord(mine[0])?.credentialSubject);
+
+      if (judged !== true) {
+        fail(key, "not-a-match", judged.join("; "));
+      }
+    }
+  }
+
+  return { ok: failures.length === 0, failures };
+}
+
+// --- reading documents that came off the wire -----------------------------------
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
+}
+
+function typesOf(credential: unknown): string[] {
+  const type = asRecord(credential)?.type;
+  if (typeof type === "string") return [type];
+  return Array.isArray(type) ? type.filter((entry): entry is string => typeof entry === "string") : [];
+}
+
+function holderOf(credential: unknown): string | undefined {
+  const holder = asRecord(asRecord(asRecord(credential)?.credentialSubject)?.holder)?.id;
+  return typeof holder === "string" ? holder : undefined;
+}

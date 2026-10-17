@@ -1,0 +1,58 @@
+{
+  "name": "@synthetism/utils",
+  "version": "0.1.0",
+  "description": "Composition over the query language — a JSON Schema engine, and the resolver that finds a holder's candidate credentials for a requirement.",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@synthetism/query": "^1.0.0",
+    "ajv": "^8.17.1"
+  },
+  "devDependencies": {
+    "@synthetism/credential": "^1.0.0",
+    "@types/node": "^24.19.2",
+    "typescript": "^5.8.3",
+    "vitest": "^5.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synthetism/packages.git"
+  },
+  "homepage": "https://synthetism.org",
+  "author": {
+    "name": "Synthetism",
+    "email": "core@synthetism.ai",
+    "url": "https://synthetism.org"
+  },
+  "keywords": [
+    "synthetism",
+    "verifiable-credentials",
+    "requirements",
+    "json-schema"
+  ],
+  "engines": {
+    "node": ">=24"
+  }
+}

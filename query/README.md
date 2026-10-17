@@ -31,12 +31,19 @@ package's major, so a drift fails in CI rather than in a caller's refused reques
 
 ## What is here, and what is not
 
-- **here:** the language — `VPLanguageSchema`, `RequirementSpec`, `MatchConditions`,
-  `RequirementSubject` — and its version.
-- **not here yet:** the resolver. Reading a requirement, taking the matching credentials
-  out of a store, and packing a presentation is the *point* of the language, but it needs
-  a defined cardinality, a defined choice rule and a holder postcondition first. Those are
-  design decisions, not omissions.
+- **here:** the language **as a schema** (`schemas/query/v1.json`), the addresses it is
+  published at, the authoring types for a service that ships this package, and `validate` —
+  the predicate that answers *does this set of credentials satisfy that requirement?*
+- **not here:** the resolver, the schema engine, and anything that picks. Selection is the
+  client's policy and lives in `@synthetism/utils`; the engine is injected, so this package
+  stays dependency-free.
+
+## Two audiences, two doors
+
+A **service** ships this package, knows which language version it speaks, and writes its
+requirement with the authoring types. A **consumer** has a document off the wire and an
+address inside it, and asks *the schema* — never the types — whether it is the language it
+claims to be. Producers are version-locked by design; consumers must be version-agnostic.
 
 ## The rule the language is guarded by
 
