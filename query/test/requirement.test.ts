@@ -1,14 +1,48 @@
+/**
+ * The requirement as an artifact — the properties that make it more than advice.
+ *
+ * Moved here with the types it tests. It asserts what a *requirement* is, not what a
+ * presentation is, and the only reason it needs `@synthetism/vc` is that a credential is
+ * what a service publishes it inside.
+ */
+
+import { createPrivateKey, sign as nodeSign } from "node:crypto";
 import { createUnsigned } from "@synthetism/credential";
-import { issue, verify } from "@synthetism/vc";
+import { didKeyFromPublicKey } from "@synthetism/did";
+import { generateKeyPair, hexPrivateKeyToPem } from "@synthetism/keys";
+import { type ISigner, issue, verify } from "@synthetism/vc";
 import { describe, expect, it } from "vitest";
 import type { RequirementSubject } from "../src/index.js";
-import { identity } from "./helpers.js";
 
-/** Where the *current* requirement is published — the shape's address. */
-const REQUIREMENT_URL = "https://synthetism.org/schemas/market-read/3";
+interface TestIdentity {
+  did: string;
+  /** A real Ed25519 signer on `node:crypto` — not on `@synthetism/signer`. */
+  signer: ISigner;
+}
+
+/** A fresh Ed25519 identity: a raw key pair, the `did:key` for it, and a signer. */
+function identity(): TestIdentity {
+  const { privateKey, publicKey } = generateKeyPair("ed25519", { format: "hex" });
+
+  const pem = hexPrivateKeyToPem(privateKey);
+  if (pem === null) throw new Error("could not convert the test key to PEM");
+
+  const key = createPrivateKey(pem);
+
+  return {
+    did: didKeyFromPublicKey(publicKey),
+    signer: {
+      sign: async (data: string) =>
+        nodeSign(null, Buffer.from(data), key).toString("base64url"),
+    },
+  };
+}
+
+/** Where a *language* version is addressed — not where a service's revision lives. */
+const LANGUAGE_URL = "https://synthetism.org/schemas/query/v1";
 
 /**
- * The requirement the README publishes, verbatim — so the documentation cannot drift
+ * A requirement, verbatim as the docs publish it — so the documentation cannot drift
  * away from something that compiles.
  */
 function marketRead(serviceDid: string): RequirementSubject {
@@ -28,21 +62,18 @@ function marketRead(serviceDid: string): RequirementSubject {
   };
 }
 
-/**
- * The credential a service publishes it in: the requirement, plus the data model's own
- * slot for **where that requirement lives**.
- */
+/** The credential a service publishes it in: the requirement, plus where it lives. */
 function requirementCredential(serviceDid: string) {
   return {
     subject: marketRead(serviceDid),
     type: "RequirementCredential",
     issuer: { id: serviceDid },
     validity: { from: "2026-01-01T00:00:00.000Z" },
-    credentialSchema: { id: REQUIREMENT_URL, type: "JsonSchemaValidator2018" },
+    credentialSchema: { id: LANGUAGE_URL, type: "JsonSchemaValidator2018" },
   };
 }
 
-describe("the VP Language", () => {
+describe("the query language", () => {
   it("is data, and it is signed by the service that will enforce it", async () => {
     const service = identity();
 
@@ -57,30 +88,30 @@ describe("the VP Language", () => {
     expect(credential.issuer.id).toBe(service.did);
   });
 
-  it("carries its own version, so a stale copy can fail distinctly", async () => {
+  it("★ carries two versions, and they are different facts", async () => {
     const service = identity();
     const { credential } = await issue(
       createUnsigned(requirementCredential(service.did)),
       service.signer,
     );
 
+    // The service's revision of its own requirement.
     expect(credential.credentialSubject.requirement.version).toBe("3");
-  });
 
-  it("★ says where the current version lives — §5.4's field, not one of our own", async () => {
-    const service = identity();
-    const { credential } = await issue(
-      createUnsigned(requirementCredential(service.did)),
-      service.signer,
-    );
-
+    // The language it is written in — frozen per major, and the same for everybody.
     expect(credential.credentialSchema).toEqual({
-      id: REQUIREMENT_URL,
+      id: LANGUAGE_URL,
       type: "JsonSchemaValidator2018",
     });
+  });
 
-    // The address is inside the signed bytes, so it cannot be rewritten in flight to
-    // point somewhere else.
+  it("★ an address edited in flight breaks the signature, not just the lookup", async () => {
+    const service = identity();
+    const { credential } = await issue(
+      createUnsigned(requirementCredential(service.did)),
+      service.signer,
+    );
+
     const moved = {
       ...credential,
       credentialSchema: {
@@ -110,7 +141,7 @@ describe("the VP Language", () => {
     expect(asked?.match?.scope).toEqual(["read"]);
   });
 
-  it("is plain JSON — it survives the wire it is published on", async () => {
+  it("is plain JSON — it survives the wire it is published on", () => {
     const service = identity();
     const subject = marketRead(service.did);
 

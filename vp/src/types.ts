@@ -1,17 +1,14 @@
 /**
- * @synthetism/vp — the shapes of the two halves of one act.
+ * @synthetism/vp — the presentation, and nothing else.
  *
  * A **presentation** is a holder saying *"I control this key, and here is what I
- * hold."* A **requirement** is a verifier saying *"here is what I will accept."*
- * They are the two sides of the same exchange and both are data — neither is a
- * credential, and neither belongs in `vc`.
+ * hold."* It is a W3C standard with a shape that is not ours to change — which is why
+ * this package holds only that. The **requirement** a verifier publishes before it will
+ * look at anything is Synthetism's own invention, changes on a different schedule, and
+ * lives in `@synthetism/query`.
  */
 
-import type {
-  CredentialSubject,
-  VerifiableCredential,
-  VerifiablePresentation,
-} from "@synthetism/credential";
+import type { VerifiableCredential, VerifiablePresentation } from "@synthetism/credential";
 
 // ---------------------------------------------------------------------------
 // The challenge — the verifier's window
@@ -86,71 +83,6 @@ export interface PresentResult<C = VerifiableCredential> {
   signingInput: string;
 }
 
-// ---------------------------------------------------------------------------
-// The VP Language — what a verifier demands, as data
-// ---------------------------------------------------------------------------
-
-/** Constraints on the fields of a presented credential. */
-export interface MatchConditions {
-  [field: string]: unknown;
-}
-
-/** One thing a verifier demands: a credential of this `type`, optionally constrained. */
-export interface RequirementSpec {
-  /** The credential `type` accepted for this purpose, e.g. `"AuthorizationCredential"`. */
-  type: string;
-  /** `false` marks a requirement as desirable rather than necessary. */
-  required?: boolean;
-  /** What the credential must say once it is opened, e.g. `{ scope: ["read"] }`. */
-  match?: MatchConditions;
-}
-
-/**
- * The VP Language — what a service requires, expressed as **data**.
- *
- * This is the only document in the exchange that serves two audiences at once: the
- * developer reading *how to call*, and the agent reading *what to present*. It is
- * published before anything is presented, on the 401, **signed by the service that
- * will enforce it** — which is the part that matters, because it means a caller is
- * told what is needed by the party that will actually check it. A lookalike cannot
- * talk an agent into over-disclosure.
- *
- * `version` is not decoration. The requirement changes on the service's schedule
- * while the credentials it accepts stay valid for months, so a copy cached by an
- * agent goes stale on its own. Every request names the version it was built
- * against, and a mismatch is its own refusal — never a mysterious failure.
- *
- * If a capability cannot be expressed here, it is not a requirement; it is a custom
- * integration. That test is the whole reason this shape is worth guarding.
- */
-export interface VPLanguageSchema {
-  /** What the requirement is called, e.g. `"market-read"`. */
-  name: string;
-  /** The requirement's own version, bumped whenever the shape below changes. */
-  version: string;
-  /** For the human reading the 401. */
-  description?: string;
-  /** Values the *service* fixes, so a caller does not have to guess them. */
-  parameters?: Record<string, unknown>;
-  /** Keyed by purpose, e.g. `{ authorization: { type: "AuthorizationCredential" } }`. */
-  requirements: Record<string, RequirementSpec>;
-}
-
-/**
- * A published requirement: the VP Language, signed by the service that will enforce
- * it.
- *
- * `holder` is the service — it is the one holding this claim, and the `issuer` is
- * the same service, which is exactly why the signature is worth checking and the
- * field is not redundant: the requirement is a statement the service makes about
- * itself, and the caller verifies it the same way it verifies anything else.
- *
- * Where the requirement *lives* is not a field here. It is the credential's
- * `credentialSchema.id` — the data model's own slot for "the address of the shape
- * this document conforms to" (§5.4) — and `requirement.version` is what catches a
- * cached copy that has gone stale.
- */
-export interface RequirementSubject extends CredentialSubject {
-  /** The requirement itself. */
-  requirement: VPLanguageSchema;
-}
+// The query language lived here until it was split out. It is Synthetism's own
+// invention with its own schedule, and a standard's package must not be released on
+// somebody else's churn. See `@synthetism/query`.

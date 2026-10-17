@@ -12,21 +12,15 @@
  * |---|---|
  * | `present` | an unsigned presentation plus a challenge in, a signed one out |
  * | `verifyPresentation` | a presentation plus the challenge you issued in, a verdict out |
- * | the VP Language | what a verifier demands, as data — `VPLanguageSchema` |
+ *
+ * What a verifier *demands* before it will look at anything is neither a presentation
+ * nor a standard — it is `@synthetism/query`.
  *
  * The verifier never holds a key, and the presenter never holds a secret belonging
  * to anyone else. That is not a convenience; it is the property the design rests on.
  */
 
-export type {
-  Challenge,
-  MatchConditions,
-  PresentResult,
-  PresentationClaims,
-  RequirementSpec,
-  RequirementSubject,
-  VPLanguageSchema,
-} from "./types.js";
+export type { Challenge, PresentResult, PresentationClaims } from "./types.js";
 
 export {
   attachPresentationProof,
