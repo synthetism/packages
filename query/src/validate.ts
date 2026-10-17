@@ -13,9 +13,14 @@
  * requirement it published, so the published requirement and the enforced check cannot
  * drift — they are the same code reading the same document. A customer calls it before
  * presenting, to know that a credential it picked will be accepted.
+ *
+ * **It knows nothing about `VerifiableCredential`,** and that is deliberate. It reads JSON:
+ * `type`, `credentialSubject.holder.id`, and whatever `match` says. Typing the input against
+ * `@synthetism/credential` would have made this package's public signature depend on a
+ * package version — so an app that upgraded `credential` would stop compiling here, for no
+ * reason anyone could act on. The shape stays generic; the caller keeps its own type.
  */
 
-import type { VerifiableCredential } from "@synthetism/credential";
 import type { SchemaEngine } from "./engine.js";
 import { LANGUAGES, type LanguageSchema } from "./languages/index.js";
 
@@ -45,11 +50,17 @@ export interface Verdict {
   failures: Failure[];
 }
 
-export interface ValidateInput {
+export interface ValidateInput<C = unknown> {
   /** The requirement credential as parsed JSON — the address lives inside it. */
   document: unknown;
-  /** What the caller has chosen to offer. One credential per requirement, ideally. */
-  credentials: readonly VerifiableCredential[];
+  /**
+   * What the caller has chosen to offer. One credential per requirement, ideally.
+   *
+   * Generic on purpose: this package never reads the type, so it should not require one.
+   * A caller passes `VerifiableCredential[]` and gets its own type back; a caller with plain
+   * parsed JSON passes that. Neither drags a package version into the other.
+   */
+  credentials: readonly C[];
   /** The DID presenting. Every credential must belong to it. */
   holder: string;
   engine: SchemaEngine;
@@ -65,7 +76,7 @@ export interface ValidateInput {
   only?: readonly string[];
 }
 
-export function validate(input: ValidateInput): Verdict {
+export function validate<C = unknown>(input: ValidateInput<C>): Verdict {
   const failures: Failure[] = [];
   const fail = (key: string, reason: FailureReason, detail?: string): void => {
     failures.push(detail === undefined ? { key, reason } : { key, reason, detail });

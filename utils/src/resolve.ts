@@ -12,7 +12,6 @@
  * whole design exists to avoid.
  */
 
-import type { VerifiableCredential } from "@synthetism/credential";
 import {
   type Failure,
   LANGUAGE_ADDRESS,
@@ -22,7 +21,7 @@ import {
   validate,
 } from "@synthetism/query";
 
-export interface Candidate {
+export interface Candidate<C = unknown> {
   /** The requirement key this answers, e.g. `authorization`. */
   key: string;
   /** The credential type it asked for. */
@@ -30,22 +29,22 @@ export interface Candidate {
   /** `false` when the requirement is desirable rather than necessary. */
   required: boolean;
   /** Everything the holder holds that satisfies it, in the order it was given. */
-  candidates: VerifiableCredential[];
+  candidates: C[];
 }
 
-export interface Resolution {
+export interface Resolution<C = unknown> {
   /** The language address the document cited, when it cited one. */
   address?: string;
-  candidates: Candidate[];
+  candidates: Candidate<C>[];
   /** Every required key has at least one candidate. Not a guarantee of admission. */
   satisfied: boolean;
   /** Why it is not satisfied — the same reasons `validate` gives. */
   failures: Failure[];
 }
 
-type ResolveInput = Omit<ValidateInput, "only">;
+type ResolveInput<C> = Omit<ValidateInput<C>, "only">;
 
-export function resolve(input: ResolveInput): Resolution {
+export function resolve<C = unknown>(input: ResolveInput<C>): Resolution<C> {
   const whole: Verdict = validate(input);
   const language = asRecord(asRecord(asRecord(input.document)?.credentialSubject)?.requirement);
 
@@ -80,7 +79,7 @@ export function resolve(input: ResolveInput): Resolution {
   }
 
   const specs = asRecord(language.requirements) ?? {};
-  const candidates: Candidate[] = [];
+  const candidates: Candidate<C>[] = [];
   const failures: Failure[] = [];
 
   for (const [key, raw] of Object.entries(specs)) {
