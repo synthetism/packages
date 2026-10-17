@@ -109,7 +109,7 @@ export function validate<C = unknown>(input: ValidateInput<C>): Verdict {
 
   // An unusable *language* is ours to own, not the caller's: they cited our address and we
   // shipped a schema our own compiler rejects.
-  if ("error" in compiled) {
+  if (!compiled.ok) {
     fail("$", "malformed-requirement", compiled.error);
     return { ok: false, failures };
   }
@@ -164,7 +164,7 @@ export function validate<C = unknown>(input: ValidateInput<C>): Verdict {
       // A `match` that is not a schema is the **requirement** being broken — `scope: [...]`
       // where a schema belongs, say. Reporting `not-a-match` would tell the client its
       // credential was wrong when the service published something no one can satisfy.
-      if ("error" in compiledMatch) {
+      if (!compiledMatch.ok) {
         fail(key, "malformed-requirement", compiledMatch.error);
         continue;
       }

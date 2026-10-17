@@ -63,10 +63,11 @@ export function ajvEngine(options: EngineOptions = {}): SchemaEngine {
         // ajv's compile messages carry a multi-line advice block. The first line is the
         // objection; the rest is a lecture, and it belongs in ajv's README, not a 400.
         const message = error instanceof Error ? error.message : String(error);
-        return { error: message.split("\n")[0] ?? message };
+        return { ok: false, error: message.split("\n")[0] ?? message };
       }
 
       return {
+        ok: true,
         run: (data: unknown): true | string[] => {
           if (run(data)) return true;
 

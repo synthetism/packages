@@ -23,13 +23,24 @@
  * caller's data, while *"this schema is unusable"* is about whoever published the schema.
  * Folded into one predicate, an unusable schema reports as a data failure and blames the
  * wrong party — which is exactly what a lenient engine did to a requirement's `match`.
+ *
+ * `ok` is a **tag**, not a convenience. Without it a caller narrows on the presence of a
+ * field (`"error" in compiled`), which silently picks the wrong branch the day a third state
+ * arrives carrying neither. With it, a `switch` is exhaustive and `never` proves it.
+ *
+ * There is deliberately **no error code**. Codes only earn their keep if a caller must
+ * *react* rather than *report*, and adding `code?: string` later is a non-breaking change,
+ * so nothing is bought by guessing a taxonomy across engines now. What would be breaking
+ * later is the tag, which is why the tag is here.
  */
 export type Compiled =
   | {
+      ok: true;
       /** `true` when the data conforms; otherwise why it did not, in human-readable strings. */
       run: (data: unknown) => true | string[];
     }
   | {
+      ok: false;
       /** The compiler's objection, verbatim. An unknown keyword, a bad `$ref`, a broken regex. */
       error: string;
     };

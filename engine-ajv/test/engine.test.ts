@@ -42,8 +42,8 @@ const realMatch = {
 describe("the ajv engine", () => {
   it("compiles a schema and judges data with it", () => {
     const compiled = ajvEngine().compile(realMatch);
-    expect("error" in compiled).toBe(false);
-    if ("error" in compiled) return;
+    expect(compiled.ok).toBe(true);
+    if (!compiled.ok) return;
 
     expect(compiled.run({ resource: "pool" })).toBe(true);
     expect(compiled.run({ resource: "elsewhere" })).not.toBe(true);
@@ -58,8 +58,8 @@ describe("the ajv engine", () => {
       resource: "https://api.example.com/market",
     });
 
-    expect("error" in compiled).toBe(true);
-    if (!("error" in compiled)) return;
+    expect(compiled.ok).toBe(false);
+    if (compiled.ok) return;
 
     expect(compiled.error).toMatch(/unknown keyword/i);
     expect(compiled.error).toMatch(/scope/);
@@ -70,7 +70,7 @@ describe("the ajv engine", () => {
 
     for (const schema of [{ type: "not-a-type" }, { $ref: "#/nowhere" }, { pattern: "(" }]) {
       expect(() => engine.compile(schema)).not.toThrow();
-      expect("error" in engine.compile(schema)).toBe(true);
+      expect(engine.compile(schema).ok).toBe(false);
     }
   });
 
@@ -92,7 +92,7 @@ describe("the ajv engine", () => {
   it("★ our own language compiles under strict", () => {
     const compiled = ajvEngine().compile(LANGUAGES[LANGUAGE_ADDRESS] as Record<string, unknown>);
 
-    expect("error" in compiled).toBe(false);
+    expect(compiled.ok).toBe(true);
   });
 
   it("collects every reason, not just the first", () => {
@@ -101,7 +101,7 @@ describe("the ajv engine", () => {
       properties: { a: { type: "string" }, b: { type: "string" } },
       required: ["a", "b"],
     });
-    if ("error" in compiled) throw new Error(compiled.error);
+    if (!compiled.ok) throw new Error(compiled.error);
 
     const reasons = compiled.run({});
     expect(Array.isArray(reasons)).toBe(true);
@@ -122,7 +122,7 @@ describe("the ajv engine", () => {
       { properties: { resource: { const: "pool" } } },
       { type: "object", properties: { scope: { contains: { const: "read" } } } },
     ]) {
-      expect("error" in engine.compile(schema)).toBe(false);
+      expect(engine.compile(schema).ok).toBe(true);
     }
   });
 });

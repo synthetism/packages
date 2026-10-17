@@ -21,8 +21,8 @@ Two implementations exist and both are outside this package:
 
 ```ts
 type Compiled =
-  | { run: (data: unknown) => true | string[] }   // it compiled
-  | { error: string };                            // it could not
+  | { ok: true;  run: (data: unknown) => true | string[] }   // it compiled
+  | { ok: false; error: string };                            // it could not
 ```
 
 *"This data does not conform"* and *"this schema is unusable"* are different facts about
@@ -32,6 +32,14 @@ accept every credential offered.
 
 `compile` never throws. An unusable schema is data about the schema, and every caller of this
 port has somewhere to put it.
+
+`ok` is a **tag**, not a convenience. Narrowing on the presence of a field
+(`"error" in compiled`) picks the wrong branch the day a third state arrives carrying
+neither. A literal tag makes a `switch` exhaustive and `never` proves it.
+
+There is deliberately **no error code**. A code earns its keep only if a caller must *react*
+rather than *report* — and `code?: string` is a non-breaking addition later, while the tag is
+not. So we pay for the one that is expensive to add late, and not for the one that is free.
 
 ## The one rule
 

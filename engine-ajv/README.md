@@ -34,11 +34,11 @@ inventing a restriction the language never stated, and reporting a correct requi
 malformed. We reject what is *not a schema*; we do not insist on a house style.
 
 **Compilation never throws.** *"This subject does not conform"* and *"this schema is unusable"*
-are different facts, and `compile` returns the second as `{ error }` rather than raising:
+are different facts, and `compile` returns the second rather than raising:
 
 ```ts
 const compiled = ajvEngine().compile(match);
-if ("error" in compiled) { /* the requirement is broken, not the credential */ }
+if (!compiled.ok) { /* the requirement is broken, not the credential */ }
 ```
 
 ajv raises on a bad `$ref` or an unknown `type` even leniently, so `validate` reports
