@@ -1,0 +1,10 @@
+# Mutants for this suite.
+#
+# Generated before the implementation exists. `vector` is what the mutant attacks; `attacks` is
+# the mechanism. `observed` is written by the runner and MUST NOT be hand-written.
+
+mutants:
+  - name: honours the algorithm the credential names
+    vector: VERIFY-004
+    attacks: reads alg from the JWT header and dispatches on it, with a `none` entry that skips verification entirely
+    file: mutants/honours-header-alg.mjs

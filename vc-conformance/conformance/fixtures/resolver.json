@@ -1,0 +1,20 @@
+{
+  "did:example:issuer-a": {
+    "id": "did:example:issuer-a",
+    "assertionMethod": [
+      {
+        "id": "did:example:issuer-a#key-1",
+        "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAH4s0uXMirQGeIXVDVrLnz1KlR0soPy2Y859aUyZxpGM=\n-----END PUBLIC KEY-----\n"
+      }
+    ]
+  },
+  "did:example:issuer-b": {
+    "id": "did:example:issuer-b",
+    "assertionMethod": [
+      {
+        "id": "did:example:issuer-b#key-1",
+        "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAFfLmdJSEbJClJuykp/o89QjGY6fi4Fsjm35EzjKmSbs=\n-----END PUBLIC KEY-----\n"
+      }
+    ]
+  }
+}

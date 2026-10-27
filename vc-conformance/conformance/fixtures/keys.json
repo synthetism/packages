@@ -1,0 +1,14 @@
+{
+  "issuerA": {
+    "did": "did:example:issuer-a",
+    "keyId": "did:example:issuer-a#key-1",
+    "privatePem": "-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEICZ/2uZYf1uPLxPJs5oJax6biPrYRn/3qJW8eh6lWUfc\n-----END PRIVATE KEY-----\n",
+    "publicPem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAH4s0uXMirQGeIXVDVrLnz1KlR0soPy2Y859aUyZxpGM=\n-----END PUBLIC KEY-----\n"
+  },
+  "issuerB": {
+    "did": "did:example:issuer-b",
+    "keyId": "did:example:issuer-b#key-1",
+    "privatePem": "-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEIIi1YA5sp8/N0C9RkeJcO5HHvYKFXPkELu5pEaU55Xqm\n-----END PRIVATE KEY-----\n",
+    "publicPem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAFfLmdJSEbJClJuykp/o89QjGY6fi4Fsjm35EzjKmSbs=\n-----END PUBLIC KEY-----\n"
+  }
+}

@@ -61,8 +61,8 @@ export function renderLanguage(artifact: unknown, target: Target): string {
 
   if (schema.$schema !== DIALECT) {
     throw new Error(
-      `a language must be written in ${DIALECT}, not ${String(schema.$schema)} — ` +
-        "an engine compiled against another dialect either refuses it or reads it wrong, and the second is worse",
+      `a language must be written in ${DIALECT}, not ${String(schema.$schema)} — 
+      an engine compiled against another dialect either refuses it or reads it wrong, and the second is worse`,
     );
   }
 
