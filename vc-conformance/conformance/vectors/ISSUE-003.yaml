@@ -1,0 +1,33 @@
+invariant: ISSUE-003
+operation: issue
+
+vectors:
+  # The credential names issuer-a. The signer speaks for issuer-b. Since the proof must carry the
+  # signer's key id and that key is not in issuer-a's document, the result could never verify — so
+  # `issue` must refuse rather than emit a credential born dead.
+  - id: v1
+    title: a signer keyed outside the issuer's DID is refused rather than issued
+    given:
+      unsigned: $fixture.unsigned
+      signer: issuer-b
+      opts:
+        format: jwt
+    expect:
+      outcome: refused
+      invariant: ISSUE-003
+
+  # The positive control. Without it, an implementation that refused everything would satisfy v1
+  # and every other refusal vector in this suite.
+  - id: v2
+    title: a signer keyed under the issuer's own DID is accepted and signs under its own key
+    fn: ops/whatWasSigned.mjs
+    given:
+      unsigned: $fixture.unsigned
+      signer: issuer-a
+      opts:
+        format: jwt
+    expect:
+      alg: EdDSA
+      signedVc: $fixture.unsigned
+      returned: $fixture.unsigned
+      hasSignature: true

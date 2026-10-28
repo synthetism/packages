@@ -110,11 +110,22 @@ security decision reviewed once, not chosen at a call site.
 
 `resolve` defaults to local `did:key` resolution.
 
-**Fixed values for the suite.** One ed25519 key pair signs. A second key pair is published under
-a different issuer, so that a wrong key can be presented as data. Vectors supply `given.resolver`
-as a DID → document map — data, not a function — and the conformance entry point adapts that map
-to `resolve`. A vector may therefore publish a document holding a different key, a document with
-no assertion methods, or no document at all.
+**Fixed values for the suite.** Two key pairs: `issuer-a` (`did:example:issuer-a`, key
+`did:example:issuer-a#key-1`) signs; `issuer-b` (`did:example:issuer-b`, key
+`did:example:issuer-b#key-1`) exists so that a wrong key can be presented as data.
+
+**`given` mirrors the operation's parameters.** A parameter that is a collaborator is supplied as a
+*name*, and the conformance entry point resolves it:
+
+| parameter | in a vector | resolved to |
+|---|---|---|
+| `unsigned` | data | itself |
+| `signer` | `issuer-a` or `issuer-b` | a signer built from that key pair |
+| `opts` | data | itself |
+| `resolve` | a DID → document map | a lookup over that map |
+
+So a vector may sign with the wrong key, publish a document holding a different key, publish a
+document with no assertion methods, or publish no document at all — and none of it is code.
 
 ---
 
@@ -122,8 +133,9 @@ no assertion methods, or no document at all.
 
 ### ISSUE-001 — the signature covers the credential that comes back
 
-The bytes signed MUST be exactly the returned credential without its proof. Any change to any
-part of the credential MUST change the signed bytes.
+The credential carried in the signed payload — the `vc` claim of the JWT — MUST be exactly the
+returned credential without its proof. Any change to any part of the credential MUST change the
+signed bytes.
 
 *Why:* a signature over something other than what is returned is a signature over nothing. The
 holder of the credential has no way to discover the difference.

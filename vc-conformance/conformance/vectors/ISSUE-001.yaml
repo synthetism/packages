@@ -1,0 +1,23 @@
+invariant: ISSUE-001
+operation: issue
+
+vectors:
+  # The claim is about the bytes that were signed versus the document that came back. Asserting that
+  # directly is impossible — one side is base64url, the other carries a signature — so the vector
+  # goes through a projection and compares meaning rather than bytes.
+  #
+  # The two halves of the expectation are the two halves of the claim: `signedVc` is what the
+  # signature covered, `returned` is what the caller received, and they must be the same document.
+  - id: v1
+    title: the credential the signature covered is the credential that came back
+    fn: ops/whatWasSigned.mjs
+    given:
+      unsigned: $fixture.unsigned
+      signer: issuer-a
+      opts:
+        format: jwt
+    expect:
+      alg: EdDSA
+      signedVc: $fixture.unsigned
+      returned: $fixture.unsigned
+      hasSignature: true

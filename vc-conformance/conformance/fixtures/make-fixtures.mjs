@@ -80,6 +80,7 @@ function claims(unsigned) {
 
 const proof = (jwtString, method) => ({ type: "JwtProof2020", jwt: jwtString, verificationMethod: method });
 const ED_DSA = { alg: "EdDSA", typ: "JWT" };
+const signingInputOf = (jwtString) => jwtString.split(".").slice(0, 2).join(".");
 
 // --- the values ---------------------------------------------------------------------------
 
@@ -147,6 +148,22 @@ const fixtures = {
 
   // Header says no signature is needed, and supplies none.
   "algNone.json": { ...unsigned, proof: proof(jwt({ alg: "none", typ: "JWT" }, commonClaims, null), KEY_A) },
+
+  // The *shape of an `issue` result*, frozen. An op's input is data of this shape, not a live run —
+  // which is what makes a projection testable before any implementation exists.
+  "issuedResult.json": {
+    outcome: "accepted",
+    signingInput: signingInputOf(issuedJwt),
+    credential: { ...unsigned, proof: proof(issuedJwt, KEY_A) },
+  },
+
+  // The same shape, with the document altered after signing. A projection that hides this gap is a
+  // projection that would let ISSUE-001 pass while the claim was false.
+  "tamperedResult.json": {
+    outcome: "accepted",
+    signingInput: signingInputOf(issuedJwt),
+    credential: tampered,
+  },
 };
 
 // --- write ---------------------------------------------------------------------------------

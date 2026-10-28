@@ -1,0 +1,42 @@
+# Vectors for the op itself. Its subject is the op, not the implementation — which is why these
+# are ordinary tests: literal input, literal output, no implementation anywhere in the loop.
+#
+# The op must be usable on its own for these to mean anything, so `given` is a frozen sample of the
+# shape it will receive in service.
+
+operation: whatWasSigned
+
+vectors:
+  - id: v1
+    title: the payload carries the credential and the returned document matches it
+    given: $fixture.issuedResult
+    expect:
+      alg: EdDSA
+      signedVc: $fixture.unsigned
+      returned: $fixture.unsigned
+      hasSignature: true
+
+  # The projection must not smooth over a document that was altered after signing. If it did,
+  # ISSUE-001 would pass on a credential whose body nobody signed.
+  - id: v2
+    title: a document altered after signing is visible as a difference, not hidden
+    given: $fixture.tamperedResult
+    expect:
+      alg: EdDSA
+      signedVc: $fixture.unsigned
+      returned:
+        "@context":
+          - https://www.w3.org/ns/credentials/v2
+        id: urn:credential:fixture:agent-authorization
+        type:
+          - VerifiableCredential
+          - AgentAuthorization
+        issuer:
+          id: did:example:issuer-a
+        issuanceDate: "2026-01-01T00:00:00.000Z"
+        expirationDate: "2026-12-31T23:59:59.000Z"
+        credentialSubject:
+          holder:
+            id: did:example:holder
+          scope: [read, write, admin]
+      hasSignature: true

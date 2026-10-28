@@ -1,0 +1,33 @@
+{
+  "outcome": "accepted",
+  "signingInput": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3OTg3NjE1OTksImlzcyI6ImRpZDpleGFtcGxlOmlzc3Vlci1hIiwianRpIjoidXJuOmNyZWRlbnRpYWw6Zml4dHVyZTphZ2VudC1hdXRob3JpemF0aW9uIiwibmJmIjoxNzY3MjI1NjAwLCJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvbnMvY3JlZGVudGlhbHMvdjIiXSwiY3JlZGVudGlhbFN1YmplY3QiOnsiaG9sZGVyIjp7ImlkIjoiZGlkOmV4YW1wbGU6aG9sZGVyIn0sInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdfSwiZXhwaXJhdGlvbkRhdGUiOiIyMDI2LTEyLTMxVDIzOjU5OjU5LjAwMFoiLCJpZCI6InVybjpjcmVkZW50aWFsOmZpeHR1cmU6YWdlbnQtYXV0aG9yaXphdGlvbiIsImlzc3VhbmNlRGF0ZSI6IjIwMjYtMDEtMDFUMDA6MDA6MDAuMDAwWiIsImlzc3VlciI6eyJpZCI6ImRpZDpleGFtcGxlOmlzc3Vlci1hIn0sInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJBZ2VudEF1dGhvcml6YXRpb24iXX19",
+  "credential": {
+    "@context": [
+      "https://www.w3.org/ns/credentials/v2"
+    ],
+    "id": "urn:credential:fixture:agent-authorization",
+    "type": [
+      "VerifiableCredential",
+      "AgentAuthorization"
+    ],
+    "issuer": {
+      "id": "did:example:issuer-a"
+    },
+    "issuanceDate": "2026-01-01T00:00:00.000Z",
+    "expirationDate": "2026-12-31T23:59:59.000Z",
+    "credentialSubject": {
+      "holder": {
+        "id": "did:example:holder"
+      },
+      "scope": [
+        "read",
+        "write"
+      ]
+    },
+    "proof": {
+      "type": "JwtProof2020",
+      "jwt": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3OTg3NjE1OTksImlzcyI6ImRpZDpleGFtcGxlOmlzc3Vlci1hIiwianRpIjoidXJuOmNyZWRlbnRpYWw6Zml4dHVyZTphZ2VudC1hdXRob3JpemF0aW9uIiwibmJmIjoxNzY3MjI1NjAwLCJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvbnMvY3JlZGVudGlhbHMvdjIiXSwiY3JlZGVudGlhbFN1YmplY3QiOnsiaG9sZGVyIjp7ImlkIjoiZGlkOmV4YW1wbGU6aG9sZGVyIn0sInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdfSwiZXhwaXJhdGlvbkRhdGUiOiIyMDI2LTEyLTMxVDIzOjU5OjU5LjAwMFoiLCJpZCI6InVybjpjcmVkZW50aWFsOmZpeHR1cmU6YWdlbnQtYXV0aG9yaXphdGlvbiIsImlzc3VhbmNlRGF0ZSI6IjIwMjYtMDEtMDFUMDA6MDA6MDAuMDAwWiIsImlzc3VlciI6eyJpZCI6ImRpZDpleGFtcGxlOmlzc3Vlci1hIn0sInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJBZ2VudEF1dGhvcml6YXRpb24iXX19.epufeulZd8ja0hUvnb9InY1kyp44_aBzjmyzvhmg0Qq7C_g_nWIWG8czbN_t3fiKgicJYTG7pn9IzMgr4CCjDg",
+      "verificationMethod": "did:example:issuer-a#key-1"
+    }
+  }
+}

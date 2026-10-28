@@ -23,3 +23,7 @@ fixtures:
     sha256: c3d09c131c9428aa1e07f8dcde86f6b85a096168ad6d495f16fc1dbe09ff99fb
   - file: algNone.json
     sha256: 721164efab4fda1f9550c38036e795ba603bffd5125f95b1008ae4e4e1619400
+  - file: issuedResult.json
+    sha256: 4cfd0bd17f0434c1e0ec6f70f076af8bd44e1278662b4a954616fa1a24806fb3
+  - file: tamperedResult.json
+    sha256: 831d298bd7e1de17f104a833f57f9d551468e2671e17fde9ac5be9fe0ebae014

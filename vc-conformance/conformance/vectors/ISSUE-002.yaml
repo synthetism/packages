@@ -1,0 +1,17 @@
+invariant: ISSUE-002
+operation: issue
+
+vectors:
+  # The JWT encoding is the only format this library honours. Anything else must come back as a
+  # decision, not as a half-built artefact — and since `expect` is the complete value, a result that
+  # also carried a `credential` or a `signingInput` would fail here.
+  - id: v1
+    title: a format the library does not honour is refused, and no artefact is returned
+    given:
+      unsigned: $fixture.unsigned
+      signer: issuer-a
+      opts:
+        format: jsonld
+    expect:
+      outcome: refused
+      invariant: ISSUE-002
