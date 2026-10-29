@@ -25,3 +25,27 @@ vectors:
       bytesHex: ed01deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
     expect:
       encoded: 6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk
+
+  - id: v4
+    title: the digits 4 and 7 are the alphabet's own, in their own places
+    from: brief
+    given:
+      bytesHex: 0000b4
+    expect:
+      encoded: "1147"
+
+  - id: v5
+    title: a zero byte inside the input is part of the number, and 9 and F keep their places
+    from: brief
+    given:
+      bytesHex: "016600"
+    expect:
+      encoded: UF9
+
+  - id: v6
+    title: an all-zero input renders as nothing but 1s
+    from: brief
+    given:
+      bytesHex: "0000"
+    expect:
+      encoded: "11"

@@ -25,3 +25,27 @@ vectors:
       encoded: 6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk
     expect:
       bytesHex: ed01deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
+
+  - id: v4
+    title: the digits 4 and 7 decode to their own values, in their own places
+    from: brief
+    given:
+      encoded: "1147"
+    expect:
+      bytesHex: 0000b4
+
+  - id: v5
+    title: a string of only 1s decodes to nothing but zero bytes
+    from: brief
+    given:
+      encoded: "11"
+    expect:
+      bytesHex: "0000"
+
+  - id: v6
+    title: a zero byte decoded from inside the number is kept, and 9 and F keep their values
+    from: brief
+    given:
+      encoded: UF9
+    expect:
+      bytesHex: "016600"

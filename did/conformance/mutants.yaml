@@ -60,7 +60,7 @@ mutants:
     raised_by: adversary
 
   - name: plain derive error
-    vector: ERR-001
+    vector: DIDKEY-002
     attacks: refuses a wrong-length key from didKeyFromPublicKey as a plain Error
     file: mutants/plain-derive-error.mjs
     raised_by: adversary
@@ -94,4 +94,136 @@ mutants:
     attacks: coerces + to alphabet index 0 instead of refusing it
     file: mutants/plus-is-zero.mjs
     raised_by: adversary
+
+  - name: shift leading zero
+    vector: DIDKEY-001
+    attacks: shifts a key that starts with 0x00 up and pads the tail with zeros
+    file: mutants/shift-leading-zero.mjs
+    raised_by: mutant-leader-v1
+
+  - name: unwrap sec1
+    vector: DIDKEY-002
+    attacks: drops a leading 0x00 from a 33-byte key and encodes the rest
+    file: mutants/unwrap-sec1.mjs
+    raised_by: mutant-leader-v1
+
+  - name: strip 0x
+    vector: DIDKEY-002
+    attacks: strips a 0x prefix before the hex check and encodes what remains
+    file: mutants/strip-0x.mjs
+    raised_by: mutant-leader-v1
+
+  - name: unpinned is zero
+    vector: RESOLVE-001
+    attacks: returns a memorised key for the two pinned DIDs and zeros for every other successful decode
+    file: mutants/unpinned-is-zero.mjs
+    raised_by: mutant-leader-v1
+
+  - name: semicolon delim
+    vector: RESOLVE-002
+    attacks: strips at the first semicolon as well as at slash, query and fragment
+    file: mutants/semicolon-delim.mjs
+    raised_by: mutant-leader-v1
+
+  - name: percent decode
+    vector: RESOLVE-002
+    attacks: percent-decodes the DID before stripping delimiters and decoding
+    file: mutants/percent-decode.mjs
+    raised_by: mutant-leader-v1
+
+  - name: accept x25519
+    vector: RESOLVE-003
+    attacks: reads an X25519 multicodec prefix ec01 as an Ed25519 key
+    file: mutants/accept-x25519.mjs
+    raised_by: mutant-leader-v1
+
+  - name: accept multibase Z
+    vector: RESOLVE-003
+    attacks: accepts uppercase Z as the base58btc multibase prefix
+    file: mutants/accept-multibase-z.mjs
+    raised_by: mutant-leader-v1
+
+  - name: trim payload
+    vector: RESOLVE-003
+    attacks: trims whitespace from the base58 payload after the prefix has matched
+    file: mutants/trim-payload.mjs
+    raised_by: mutant-leader-v1
+
+  - name: scheme casefold
+    vector: RESOLVE-003
+    attacks: case-folds the DID scheme and method before the prefix check
+    file: mutants/scheme-casefold.mjs
+    raised_by: mutant-leader-v1
+
+  - name: truncate long
+    vector: RESOLVE-003
+    attacks: slices a multicodec payload longer than 34 bytes down to 34
+    file: mutants/truncate-long.mjs
+    raised_by: mutant-leader-v1
+
+  - name: guard skips multicodec
+    vector: GUARD-001
+    attacks: returns true for any 34-byte did:key payload, Ed25519 prefix or not
+    file: mutants/guard-skips-multicodec.mjs
+    raised_by: mutant-leader-v1
+
+  - name: guard rejects path
+    vector: GUARD-001
+    attacks: returns false when the string contains a path or query
+    file: mutants/guard-rejects-path.mjs
+    raised_by: mutant-leader-v1
+
+  - name: object is key
+    vector: GUARD-001
+    attacks: returns true for objects and null, which typeof reports as object
+    file: mutants/object-is-key.mjs
+    raised_by: mutant-leader-v1
+
+  - name: wrap only zero
+    vector: ERR-001
+    attacks: wraps a codec fault only when the offending character is 0
+    file: mutants/wrap-only-zero.mjs
+    raised_by: mutant-leader-v1
+
+  - name: swap 9 and F
+    vector: B58E-001
+    attacks: transposes alphabet digits 9 and F
+    file: mutants/swap-9-f.mjs
+    raised_by: mutant-leader-v1
+
+  - name: all zero empty
+    vector: B58E-001
+    attacks: encodes a non-empty all-zero buffer as the empty string
+    file: mutants/all-zero-empty.mjs
+    raised_by: mutant-leader-v1
+
+  - name: drop internal zero
+    vector: B58E-001
+    attacks: deletes non-leading zero bytes before encoding
+    file: mutants/drop-internal-zero.mjs
+    raised_by: mutant-leader-v1
+
+  - name: swap 9 and F decode
+    vector: B58D-001
+    attacks: transposes alphabet digits 9 and F when decoding
+    file: mutants/swap-9-f-decode.mjs
+    raised_by: mutant-leader-v1
+
+  - name: ones only empty
+    vector: B58D-001
+    attacks: decodes a string of only 1 characters to no bytes
+    file: mutants/ones-only-empty.mjs
+    raised_by: mutant-leader-v1
+
+  - name: drop internal zero decode
+    vector: B58D-001
+    attacks: deletes non-leading zero bytes after decoding
+    file: mutants/drop-internal-zero-decode.mjs
+    raised_by: mutant-leader-v1
+
+  - name: strip codec space
+    vector: B58D-002
+    attacks: strips whitespace and then decodes, instead of refusing it
+    file: mutants/strip-codec-space.mjs
+    raised_by: mutant-leader-v1
 

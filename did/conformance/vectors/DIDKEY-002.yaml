@@ -46,8 +46,28 @@ vectors:
     title: an overlong malformed input is refused with a bounded message, never echoed whole
     from: brief
     given:
-      publicKeyHex: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
+      publicKeyHex: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
     expect:
       throws:
         name: DidKeyError
         message: "expected hex characters, got \"zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz…\""
+
+  - id: v6
+    title: a 33-byte key is refused even when a leading zero byte begs to be unwrapped
+    from: brief
+    given:
+      publicKeyHex: 00deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
+    expect:
+      throws:
+        name: DidKeyError
+        message: "expected a 32-byte Ed25519 public key, got 33 bytes"
+
+  - id: v7
+    title: a 0x prefix is not stripped — the whole string is hex or nothing
+    from: brief
+    given:
+      publicKeyHex: 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
+    expect:
+      throws:
+        name: DidKeyError
+        message: "expected hex characters, got \"0xdeadbeefdeadbeefdeadbeefdeadbe…\""

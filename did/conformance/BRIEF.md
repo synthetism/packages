@@ -56,12 +56,15 @@ key, no network, no registry.
 
 `did:key:z…#key-1` names a key, not a different DID. Whatever follows the first `/`, `?` or
 `#` is stripped before decoding, so every DID URL over a base DID resolves to the base DID's
-key.
+key. Only those three delimit: anything else appended to the DID — a semicolon parameter, a
+percent escape — makes it malformed, not smaller.
 
 ### RESOLVE-003 — input that is not an Ed25519 did:key is refused, never misread as one
 
 Wrong method, wrong multibase prefix, wrong multicodec prefix, wrong payload length: each is
 a refusal. A `did:key` for another curve is rejected rather than silently read as Ed25519.
+The match on `did:key:z` is exact and case-sensitive: nothing is trimmed, case-folded, or
+otherwise normalised before it, and the payload is taken whole — never sliced to fit.
 Every refusal from this operation is a `DidKeyError` (see ERR-001), including a fault
 detected by the codec underneath.
 
@@ -86,7 +89,9 @@ layering error dressed as a convenience. The class crosses the wire as `throws.n
 ### B58E-001 — base58btcEncode renders the bytes' numeric value in the Bitcoin alphabet and renders each leading zero byte as one leading "1"
 
 The alphabet excludes `0`, `O`, `I` and `l`. Leading zero bytes are significant and survive
-the round trip as leading `1` characters; empty input encodes to the empty string.
+the round trip as leading `1` characters; empty input encodes to the empty string. An
+all-zero input renders as nothing but `1`s, and a zero byte anywhere else is part of the
+number.
 
 ### B58D-001 — base58btcDecode reproduces the exact bytes, one leading zero byte per leading "1"
 
@@ -141,4 +146,33 @@ reconstruction — corroboration, no findings.
 | ERR-001 | claimed | the class is on the wire as `throws.name`; a mutant throwing plain `Error` at the DID layer is killed | prose claim promoted to invariant; two vectors pin the wrapped and the direct refusal; wire and adapter changed to carry the class |
 | B58E-001 | claimed | leading-zero significance is the codec's one surprise | givens re-chosen; v2/v3 are the exact inverses of B58D-001 v2/v3, pinning the round trip by composition |
 | B58D-001 | claimed | exact inverse of encoding | same re-derivation, decode direction |
-| B58D-002 | claimed | the alphabet's edges are the codec's business; codec refusals stay plain | v2 moved off position 0 (`1O` refused at 1), titles reworded, all four pin `name: Error` |
+| B58D-002 | claimed | the alphabet's edges are the codec's business; codec refusals stay plain | v2 moved off position 0 (`1O` refused at 1), titles reworded, all four pin `name: Error`; v5 added after the attack (`+` refused, never coerced) |
+
+### After the first attack (blind adversary, 16 mutants, 10 killed)
+
+Six survivors; five killed by new vectors, one confirmed unkillable and already declared:
+
+- DIDKEY-001 v4 — a second key kills `deadbeef lookup` (memorisation).
+- RESOLVE-003 v6 + GUARD-001 v6 — whitespace is never trimmed; kills `trim did` at both doors.
+- B58E-001 v4 + B58D-001 v4 — `0000b4` ↔ `1147` pins alphabet digits `4` and `7` in both directions; kills `swapped unused digits`.
+- B58D-002 v5 — `+` refused, kills `plus is zero` (coercion).
+- ERR-001 slimmed to its one distinct vector (the wrap); `plain derive error` was an aim
+  artifact — the writer re-aimed it at DIDKEY-002, disclosed in QUESTIONS.md, where the
+  runner observes the kill.
+- DIDKEY-002 v5's `z`-string was 191 chars — the adversary caught it conflating parity
+  and charset faults. Now exactly 200; it pins the bound and nothing else.
+- `swallow defects` stands as the sole survivor — the declared unchecked obligation.
+
+### After the second attack (mutant-leader-v1, source read, 23 new mutants)
+
+22 of 23 killed by 19 new or sharpened vectors, all `from: brief`, all values derived from
+the encoding rule; the last survivor is still `swallow defects`. Brief claims sharpened in
+three places the attack showed were only implicit: RESOLVE-002 (only `/`, `?`, `#`
+delimit), RESOLVE-003 (exact, case-sensitive match; nothing trimmed; payload whole),
+B58E-001 (all-zero renders as `1`s; interior zeros are numeric). Two mutants were killed
+by moving existing cases onto sharper ground rather than adding cases: RESOLVE-003 v2 now
+carries `Z` (not `Q`) and v3 carries X25519 `ec01` (not `ed02`). One mutant dies with
+collateral — `wrap only zero` fails in four places because the wrap contract is pinned
+from three invariants; recorded as the claim's breadth, not a defect. GUARD-001 v9
+restores a `null` case: the pass-1 trim had assumed `42` and `null` share a branch, and
+the `typeof`-object mutant proved they do not.

@@ -25,3 +25,19 @@ vectors:
       publicKeyHex: deadBEEFdeadBEEFdeadBEEFdeadBEEFdeadBEEFdeadBEEFdeadBEEFdeadBEEF
     expect:
       did: did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk
+
+  - id: v4
+    title: a second key derives its own DID — the encoding is a function, not a table
+    from: brief
+    given:
+      publicKeyHex: 0f1e2d3c4b5a69780f1e2d3c4b5a69780f1e2d3c4b5a69780f1e2d3c4b5a6978
+    expect:
+      did: did:key:z6MkfUGrDYceev8veDy4M3qRBoXsjCPZyJCSpv3oTUBVzqA7
+
+  - id: v5
+    title: a leading zero byte is part of the key, never shifted off
+    from: brief
+    given:
+      publicKeyHex: 00deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbe
+    expect:
+      did: did:key:z6MkeWez1EnKsEND6Lvvny4AM5PZSCfg2YzuBEZhDAxTguqw

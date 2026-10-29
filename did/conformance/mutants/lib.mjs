@@ -60,13 +60,29 @@ export function decodeBase58(encoded, alphabet = ALPHABET, { skipUnknown = false
   return out;
 }
 
-export function base58btcEncode(bytesHex, { alphabet = ALPHABET, emitLeadingOnes = true } = {}) {
-  const encoded = encodeBase58(hexToBytes(bytesHex), alphabet);
+export function base58btcEncode(bytesHex, { alphabet = ALPHABET, emitLeadingOnes = true, allZeroEmpty = false, dropInternalZeros = false } = {}) {
+  let bytes = hexToBytes(bytesHex);
+  if (dropInternalZeros) {
+    let i = 0;
+    while (i < bytes.length && bytes[i] === 0) i++;
+    const tail = [...bytes.slice(i)].filter((byte) => byte !== 0);
+    bytes = Uint8Array.from([...bytes.slice(0, i), ...tail]);
+  }
+  if (allZeroEmpty && bytes.length > 0 && bytes.every((byte) => byte === 0)) return "";
+  const encoded = encodeBase58(bytes, alphabet);
   return emitLeadingOnes ? encoded : encoded.replace(/^1+/, "");
 }
 
 export function base58btcDecode(encoded, opts = {}) {
-  const bytes = decodeBase58(encoded, opts.alphabet ?? ALPHABET, opts);
+  const text = opts.stripSpace ? String(encoded).replace(/\s/g, "") : encoded;
+  if (opts.onesAreEmpty && /^1+$/.test(text)) return "";
+  let bytes = decodeBase58(text, opts.alphabet ?? ALPHABET, opts);
+  if (opts.dropInternalZeros) {
+    let i = 0;
+    while (i < bytes.length && bytes[i] === 0) i++;
+    const tail = [...bytes.slice(i)].filter((byte) => byte !== 0);
+    bytes = Uint8Array.from([...bytes.slice(0, i), ...tail]);
+  }
   return bytesToHex(bytes);
 }
 
@@ -84,7 +100,8 @@ export function parseKeyHex(hex, { caseSensitive = false, truncateMessage = true
 }
 
 export function didKeyFromPublicKey(hex, opts = {}) {
-  const bytes = parseKeyHex(hex, opts);
+  let bytes = parseKeyHex(hex, opts);
+  if (opts.unwrapSec1 && bytes.length === 33 && bytes[0] === 0x00) bytes = bytes.slice(1);
   let key = bytes;
   if (bytes.length !== 32) {
     if (opts.padShort && bytes.length < 32) {
@@ -96,6 +113,13 @@ export function didKeyFromPublicKey(hex, opts = {}) {
       throw error;
     }
   }
+  if (opts.shiftOffLeadingZero && key[0] === 0) {
+    let i = 0;
+    while (i < key.length && key[i] === 0) i++;
+    const shifted = new Uint8Array(32);
+    shifted.set(key.slice(i));
+    key = shifted;
+  }
   const payload = new Uint8Array(34);
   payload[0] = 0xed;
   payload[1] = 0x01;
@@ -104,7 +128,7 @@ export function didKeyFromPublicKey(hex, opts = {}) {
 }
 
 export function stripDidUrl(did, mode = "all") {
-  const pattern = mode === "hash" ? /#/ : /[/?#]/;
+  const pattern = mode === "hash" ? /#/ : mode === "semi" ? /[/?#;]/ : /[/?#]/;
   const at = did.search(pattern);
   return at === -1 ? did : did.slice(0, at);
 }
@@ -116,21 +140,34 @@ export function publicKeyFromDidKey(did, opts = {}) {
     throw new DidKeyError(`not a did:key: ${JSON.stringify(rawDid)}`);
   }
   const multibase = base.slice("did:key:".length);
-  if (!multibase.startsWith("z")) {
+  const z = multibase.startsWith("z") || (opts.acceptZ && multibase.startsWith("Z"));
+  if (!z) {
     throw new DidKeyError(`unsupported multibase prefix in ${JSON.stringify(rawDid)} (expected "z")`);
   }
+  let payload = multibase.slice(1);
+  if (opts.trimPayload) payload = payload.trim();
   let raw;
   try {
-    raw = decodeBase58(multibase.slice(1));
+    raw = decodeBase58(payload);
   } catch (error) {
     const detail = String(error.message).replace(/^base58btc: /, "");
     const message = `invalid base58btc payload in ${JSON.stringify(rawDid)} (${detail})`;
+    const character = detail.match(/invalid character "(.)"/)?.[1];
+    if (opts.plainUnlessCharacterZero && character !== "0") {
+      const plain = new Error(message);
+      plain.name = "Error";
+      throw plain;
+    }
     if (opts.codecFaultIsPlain) {
       const plain = new Error(message);
       plain.name = "Error";
       throw plain;
     }
     throw new DidKeyError(message);
+  }
+  if (opts.truncateLong && raw.length > 34) raw = raw.slice(0, 34);
+  if (opts.acceptX25519 && raw.length === 34 && raw[0] === 0xec && raw[1] === 0x01) {
+    return bytesToHex(raw.slice(2));
   }
   const ed25519 = raw.length >= 2 && raw[0] === 0xed && raw[1] === 0x01;
   if (!ed25519 && !opts.acceptOtherCurve) {
@@ -154,7 +191,7 @@ export function isDidKey(value, opts = {}) {
     return false;
   }
   try {
-    publicKeyFromDidKey(value);
+    publicKeyFromDidKey(value, opts);
     return true;
   } catch (error) {
     if (opts.swallowAll || error?.name === "DidKeyError") return false;

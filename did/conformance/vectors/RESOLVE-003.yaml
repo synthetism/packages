@@ -13,20 +13,20 @@ vectors:
         message: "not a did:key: \"did:web:synthetism.invalid\""
 
   - id: v2
-    title: a non-z multibase prefix is refused before any decoding
+    title: a non-z multibase prefix is refused before any decoding — case included
     from: brief
     given:
-      did: did:key:Q6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk
+      did: did:key:Z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk
     expect:
       throws:
         name: DidKeyError
-        message: "unsupported multibase prefix in \"did:key:Q6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk\" (expected \"z\")"
+        message: "unsupported multibase prefix in \"did:key:Z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk\" (expected \"z\")"
 
   - id: v3
-    title: a well-formed did:key for another curve is refused, not misread
+    title: a well-formed did:key for X25519 is refused, not misread as Ed25519
     from: brief
     given:
-      did: did:key:z6MmCfpayyLUabBwbFgz9fcnxBhUKheLb8WRiuZ8LfwXgzn2
+      did: did:key:z6LSrfRLRF9JYTgT14SdmZzcETZS6nGH8eN8RpQZ8wCGyCX8
     expect:
       throws:
         name: DidKeyError
@@ -51,3 +51,43 @@ vectors:
       throws:
         name: DidKeyError
         message: "invalid base58btc payload in \"did:key:z0abc\" (invalid character \"0\" at position 0)"
+
+  - id: v6
+    title: whitespace around a DID is never trimmed away — a padded string is not a did:key
+    from: brief
+    given:
+      did: " did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk "
+    expect:
+      throws:
+        name: DidKeyError
+        message: "not a did:key: \" did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk \""
+
+  - id: v7
+    title: whitespace inside the payload is a payload fault, never trimmed after the prefix matches
+    from: brief
+    given:
+      did: "did:key:z 6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk"
+    expect:
+      throws:
+        name: DidKeyError
+        message: "invalid base58btc payload in \"did:key:z 6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk\" (invalid character \" \" at position 0)"
+
+  - id: v8
+    title: the scheme and method match exactly — case-folded is not a did:key
+    from: brief
+    given:
+      did: DID:KEY:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk
+    expect:
+      throws:
+        name: DidKeyError
+        message: "not a did:key: \"DID:KEY:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk\""
+
+  - id: v9
+    title: a payload longer than 34 bytes is refused, never sliced down
+    from: brief
+    given:
+      did: did:key:zQecnTZx7PiXA1pXEAj2K6XXw3iJ5Zy4ivrov9vc9V4MyLAgo
+    expect:
+      throws:
+        name: DidKeyError
+        message: "expected 34 multicodec bytes, got 35"

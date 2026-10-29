@@ -41,3 +41,35 @@ vectors:
       value: did:web:synthetism.invalid
     expect:
       result: false
+
+  - id: v6
+    title: a whitespace-padded did:key is false — the guard does not trim
+    from: brief
+    given:
+      value: " did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk "
+    expect:
+      result: false
+
+  - id: v7
+    title: a did:key for another curve is false — resolvable means resolvable as Ed25519
+    from: brief
+    given:
+      value: did:key:z6LSrfRLRF9JYTgT14SdmZzcETZS6nGH8eN8RpQZ8wCGyCX8
+    expect:
+      result: false
+
+  - id: v8
+    title: a DID URL carrying a path and query is accepted, same as a fragment
+    from: brief
+    given:
+      value: did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk/path?service=agent
+    expect:
+      result: true
+
+  - id: v9
+    title: null is false, never a throw — non-strings are not keys
+    from: brief
+    given:
+      value: null
+    expect:
+      result: false

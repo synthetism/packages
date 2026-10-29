@@ -13,11 +13,11 @@ vectors:
         message: "invalid base58btc payload in \"did:key:z0abc\" (invalid character \"0\" at position 0)"
 
   - id: v2
-    title: a fault the DID layer detected itself is a DidKeyError
+    title: every codec fault is wrapped, not just the one already pinned
     from: brief
     given:
-      did: did:web:synthetism.invalid
+      did: did:key:zIabc
     expect:
       throws:
         name: DidKeyError
-        message: "not a did:key: \"did:web:synthetism.invalid\""
+        message: "invalid base58btc payload in \"did:key:zIabc\" (invalid character \"I\" at position 0)"

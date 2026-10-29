@@ -17,3 +17,11 @@ vectors:
       did: did:key:z6MkeWez1EnKsEND6Lvvny4AM5PZSCfg2YzuBEZhDAxTguqw
     expect:
       publicKeyHex: 00deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbe
+
+  - id: v3
+    title: a third key resolves to itself — resolution is a function, not a table
+    from: brief
+    given:
+      did: did:key:z6Mkt7fjueRBrZjmqSDRPbU6FxpnTKC6RFEyoSpRUPNeJZiV
+    expect:
+      publicKeyHex: cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe

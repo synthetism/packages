@@ -41,3 +41,23 @@ vectors:
       throws:
         name: Error
         message: "base58btc: invalid character \"l\" at position 0"
+
+  - id: v5
+    title: a character outside the alphabet is refused, never coerced to a digit
+    from: brief
+    given:
+      encoded: "+"
+    expect:
+      throws:
+        name: Error
+        message: "base58btc: invalid character \"+\" at position 0"
+
+  - id: v6
+    title: whitespace is a character outside the alphabet — refused, never stripped
+    from: brief
+    given:
+      encoded: "1115Q "
+    expect:
+      throws:
+        name: Error
+        message: "base58btc: invalid character \" \" at position 5"

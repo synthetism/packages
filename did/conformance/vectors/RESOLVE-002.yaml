@@ -25,3 +25,23 @@ vectors:
       did: did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk?service=agent#key-1
     expect:
       publicKeyHex: deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
+
+  - id: v4
+    title: a semicolon is not a delimiter — what follows it makes the DID malformed, not smaller
+    from: brief
+    given:
+      did: did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk;foo
+    expect:
+      throws:
+        name: DidKeyError
+        message: "invalid base58btc payload in \"did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk;foo\" (invalid character \";\" at position 47)"
+
+  - id: v5
+    title: a percent sign is not decoded away — it is an invalid payload character
+    from: brief
+    given:
+      did: did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk%2Fpath
+    expect:
+      throws:
+        name: DidKeyError
+        message: "invalid base58btc payload in \"did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk%2Fpath\" (invalid character \"%\" at position 47)"
