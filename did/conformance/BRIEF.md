@@ -1,4 +1,6 @@
-Reconstructed from the implementation on 2026-10-29. These are claims about what the code does, not what it was asked to do.
+Reconstructed from the implementation on 2026-10-29; claimed by the writer the same day —
+every vector is `from: brief` and the claims are intent, not observation. Provenance and
+per-invariant dispositions are in the Handover section.
 
 # @synthetism/did — did:key, both directions
 
@@ -121,18 +123,22 @@ DIDs (see ERR-001).
 
 ## Handover
 
-Claiming is in progress. A row reads "claimed" only where its vectors were rewritten from
-the claim alone; everything else still says `from: code` and waits its turn.
+Claiming is complete: every vector says `from: brief`, and none left `from: code` — nothing
+was left open. Two values could only be restated, not re-chosen (the empty-string codec
+cases in B58E-001 v1 and B58D-001 v1 — there is exactly one empty input); their titles and
+reasoning are mine. Every claimed value was derived from the brief's encoding rule by an
+independent script calibrated on the README anchor; every one of them matched the
+reconstruction — corroboration, no findings.
 
 | invariant | disposition | why | what changed |
 |---|---|---|---|
 | DIDKEY-001 | claimed | the encoding is the promise; case-insensitive input is now part of it (option A, accepted by the human) | claim extended with the case-insensitivity sentence; givens re-chosen, expects re-derived from the encoding rule; zero-key case dropped (no wrong implementation it alone rejected); titles reworded |
 | DIDKEY-002 | claimed | refusal at the boundary keeps a wrong key from being named | claim extended: the message names the fault and is bounded at 32 characters; v1–v3 givens re-chosen and messages re-authored; v4/v5 authored (`expected hex characters…`); all pin `name: DidKeyError` |
-| RESOLVE-001 | claim, pending rewrite | local, total resolution is the point of did:key | — |
-| RESOLVE-002 | claim, pending rewrite | the README promises DID URL acceptance | — |
+| RESOLVE-001 | claimed | local, total resolution is the point of did:key | givens re-chosen (deadbeef key, leading-zero-byte key), expects re-derived; v1 completes the normalising round trip with DIDKEY-001 |
+| RESOLVE-002 | claimed | the README promises DID URL acceptance | givens re-chosen; v3 added — query-before-fragment pins "the first delimiter, whichever it is" |
 | RESOLVE-003 | claimed | wrong curve must never be misread; every refusal is a DidKeyError | givens re-derived (wrong-curve and truncated payloads constructed from the encoding rule); v5 authored (codec fault wrapped at the DID layer); all pin `name: DidKeyError` |
-| GUARD-001 | claim, pending rewrite | never throwing on malformed input is what the guard exists for | heading reworded; surgical catch claimed (defects propagate); vectors not yet re-derived |
+| GUARD-001 | claimed | never throwing on malformed input is what the guard exists for | heading reworded (never throws *on malformed input*); surgical catch claimed, rethrow half declared an unchecked obligation; null case dropped (same branch as 42, which also kills the truthiness mutant); five cases: two true branches, three false branches, one mutant each |
 | ERR-001 | claimed | the class is on the wire as `throws.name`; a mutant throwing plain `Error` at the DID layer is killed | prose claim promoted to invariant; two vectors pin the wrapped and the direct refusal; wire and adapter changed to carry the class |
-| B58E-001 | claim, pending rewrite | leading-zero significance is the codec's one surprise | — |
-| B58D-001 | claim, pending rewrite | exact inverse of encoding | — |
+| B58E-001 | claimed | leading-zero significance is the codec's one surprise | givens re-chosen; v2/v3 are the exact inverses of B58D-001 v2/v3, pinning the round trip by composition |
+| B58D-001 | claimed | exact inverse of encoding | same re-derivation, decode direction |
 | B58D-002 | claimed | the alphabet's edges are the codec's business; codec refusals stay plain | v2 moved off position 0 (`1O` refused at 1), titles reworded, all four pin `name: Error` |

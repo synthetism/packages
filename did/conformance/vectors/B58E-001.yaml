@@ -3,33 +3,25 @@ operation: base58btcEncode
 
 vectors:
   - id: v1
-    title: empty input encodes to the empty string
-    from: code
+    title: no bytes render as no characters
+    from: brief
     given:
       bytesHex: ""
     expect:
       encoded: ""
 
   - id: v2
-    title: two leading zero bytes become two leading 1 characters
-    from: code
+    title: each leading zero byte renders as exactly one leading 1
+    from: brief
     given:
-      bytesHex: 0000ffff
+      bytesHex: 000000ff
     expect:
-      encoded: 11LUv
+      encoded: 1115Q
 
   - id: v3
-    title: a single zero byte with a nonzero tail becomes 1 then the value
-    from: code
+    title: the multicodec payload renders as the body of its DID
+    from: brief
     given:
-      bytesHex: "0001"
+      bytesHex: ed01deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
     expect:
-      encoded: "12"
-
-  - id: v4
-    title: the Ed25519 multicodec payload encodes to the payload half of the README DID
-    from: code
-    given:
-      bytesHex: ed01b078fed776413d8be5918ef229480acb51586fed28b8eeec4066077f84547784
-    expect:
-      encoded: 6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw
+      encoded: 6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk

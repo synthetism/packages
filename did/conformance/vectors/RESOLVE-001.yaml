@@ -3,17 +3,17 @@ operation: publicKeyFromDidKey
 
 vectors:
   - id: v1
-    title: the README DID resolves to the README key
-    from: code
+    title: the key that went in comes back out, byte for byte, in lowercase
+    from: brief
     given:
-      did: did:key:z6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw
+      did: did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk
     expect:
-      publicKeyHex: b078fed776413d8be5918ef229480acb51586fed28b8eeec4066077f84547784
+      publicKeyHex: deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
 
   - id: v2
-    title: the zero-key DID resolves to 32 zero bytes
-    from: code
+    title: a leading zero byte in the key survives the round trip
+    from: brief
     given:
-      did: did:key:z6MkeTG3bFFSLYVU7VqhgZxqr6YzpaGrQtFMh1uvqGy1vDnP
+      did: did:key:z6MkeWez1EnKsEND6Lvvny4AM5PZSCfg2YzuBEZhDAxTguqw
     expect:
-      publicKeyHex: "0000000000000000000000000000000000000000000000000000000000000000"
+      publicKeyHex: 00deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbe

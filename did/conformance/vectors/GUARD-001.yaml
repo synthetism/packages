@@ -3,49 +3,41 @@ operation: isDidKey
 
 vectors:
   - id: v1
-    title: a resolvable did:key is accepted
-    from: code
+    title: a bare resolvable did:key is accepted
+    from: brief
     given:
-      value: did:key:z6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw
+      value: did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk
     expect:
       result: true
 
   - id: v2
-    title: a DID URL carrying a fragment is accepted
-    from: code
+    title: a DID URL over a resolvable did:key is accepted — true means resolvable, not bare
+    from: brief
     given:
-      value: did:key:z6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw#key-1
+      value: did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk#key-1
     expect:
       result: true
 
   - id: v3
-    title: a non-string input returns false instead of throwing
-    from: code
+    title: a non-string is false, never a throw
+    from: brief
     given:
       value: 42
     expect:
       result: false
 
   - id: v4
-    title: a null input returns false instead of throwing
-    from: code
-    given:
-      value: null
-    expect:
-      result: false
-
-  - id: v5
-    title: a string with an invalid base58 character returns false
-    from: code
+    title: a did:key-shaped string that does not decode is false
+    from: brief
     given:
       value: did:key:z0abc
     expect:
       result: false
 
-  - id: v6
-    title: another DID method returns false
-    from: code
+  - id: v5
+    title: another DID method is false
+    from: brief
     given:
-      value: did:web:example.com
+      value: did:web:synthetism.invalid
     expect:
       result: false

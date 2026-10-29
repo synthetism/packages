@@ -3,17 +3,25 @@ operation: publicKeyFromDidKey
 
 vectors:
   - id: v1
-    title: a key fragment resolves to the base DID's key
-    from: code
+    title: a fragment names a key within the DID, never another key
+    from: brief
     given:
-      did: did:key:z6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw#key-1
+      did: did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk#key-1
     expect:
-      publicKeyHex: b078fed776413d8be5918ef229480acb51586fed28b8eeec4066077f84547784
+      publicKeyHex: deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
 
   - id: v2
-    title: a path and query resolve to the base DID's key
-    from: code
+    title: a path and a query resolve to the base DID's key
+    from: brief
     given:
-      did: did:key:z6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw/path?service=agent
+      did: did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk/path?service=agent
     expect:
-      publicKeyHex: b078fed776413d8be5918ef229480acb51586fed28b8eeec4066077f84547784
+      publicKeyHex: deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
+
+  - id: v3
+    title: whatever follows the first delimiter is stripped, whichever delimiter comes first
+    from: brief
+    given:
+      did: did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk?service=agent#key-1
+    expect:
+      publicKeyHex: deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef

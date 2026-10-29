@@ -3,8 +3,8 @@ operation: base58btcDecode
 
 vectors:
   - id: v1
-    title: the empty string decodes to no bytes
-    from: code
+    title: no characters decode to no bytes
+    from: brief
     given:
       encoded: ""
     expect:
@@ -12,16 +12,16 @@ vectors:
 
   - id: v2
     title: three leading 1 characters decode to three leading zero bytes
-    from: code
+    from: brief
     given:
-      encoded: 1114dPa
+      encoded: 1115Q
     expect:
-      bytesHex: 0000000acca5
+      bytesHex: 000000ff
 
   - id: v3
-    title: the README DID's payload decodes to 0xed01 concatenated with the README key
-    from: code
+    title: a DID's body decodes to the multicodec prefix joined to the key
+    from: brief
     given:
-      encoded: 6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw
+      encoded: 6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk
     expect:
-      bytesHex: ed01b078fed776413d8be5918ef229480acb51586fed28b8eeec4066077f84547784
+      bytesHex: ed01deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef

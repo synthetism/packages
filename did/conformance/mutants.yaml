@@ -1,3 +1,97 @@
-# Empty on purpose. This suite was reconstructed from the implementation; no attack pass has
-# run yet. The adversary fills this, not the reconstructor.
-mutants: []
+mutants:
+  - name: ignorant mutant
+    vector: ALL
+    attacks: ignores stdin and returns a fixed answer
+    file: mutants/constant.mjs
+    raised_by: adversary
+
+  - name: case-sensitive hex
+    vector: DIDKEY-001
+    attacks: treats hex as case-sensitive and refuses A-F
+    file: mutants/case-sensitive-hex.mjs
+    raised_by: adversary
+
+  - name: deadbeef lookup
+    vector: DIDKEY-001
+    attacks: returns a memorised DID for the deadbeef key and a different encoding for every other key
+    file: mutants/deadbeef-lookup.mjs
+    raised_by: adversary
+
+  - name: unbounded refusal
+    vector: DIDKEY-002
+    attacks: embeds the entire malformed hex input in the refusal message
+    file: mutants/unbounded-refusal.mjs
+    raised_by: adversary
+
+  - name: drop leading zero
+    vector: RESOLVE-001
+    attacks: strips leading zero bytes from the resolved key
+    file: mutants/drop-leading-zero.mjs
+    raised_by: adversary
+
+  - name: hash-only strip
+    vector: RESOLVE-002
+    attacks: strips a fragment and leaves path and query on the multibase
+    file: mutants/hash-only-strip.mjs
+    raised_by: adversary
+
+  - name: accept other curve
+    vector: RESOLVE-003
+    attacks: returns the trailing 32 bytes of a non-Ed25519 multicodec payload
+    file: mutants/accept-other-curve.mjs
+    raised_by: adversary
+
+  - name: trim did
+    vector: RESOLVE-003
+    attacks: trims whitespace and then resolves the remainder as a did:key
+    file: mutants/trim-did.mjs
+    raised_by: adversary
+
+  - name: truthy non-string
+    vector: GUARD-001
+    attacks: returns the truthiness of a non-string instead of false
+    file: mutants/truthy-non-string.mjs
+    raised_by: adversary
+
+  - name: swallow defects
+    vector: GUARD-001
+    attacks: catches every throw and reports it as false
+    file: mutants/swallow-defects.mjs
+    raised_by: adversary
+
+  - name: plain derive error
+    vector: ERR-001
+    attacks: refuses a wrong-length key from didKeyFromPublicKey as a plain Error
+    file: mutants/plain-derive-error.mjs
+    raised_by: adversary
+
+  - name: omit leading ones
+    vector: B58E-001
+    attacks: drops leading zero bytes instead of rendering each as 1
+    file: mutants/omit-leading-ones.mjs
+    raised_by: adversary
+
+  - name: swapped unused digits
+    vector: B58E-001
+    attacks: transposes alphabet digits 4 and 7
+    file: mutants/swapped-unused-digits.mjs
+    raised_by: adversary
+
+  - name: drop leading ones
+    vector: B58D-001
+    attacks: ignores leading 1 characters when counting leading zero bytes
+    file: mutants/drop-leading-ones.mjs
+    raised_by: adversary
+
+  - name: skip invalid
+    vector: B58D-002
+    attacks: skips characters outside the alphabet instead of refusing
+    file: mutants/skip-invalid.mjs
+    raised_by: adversary
+
+  - name: plus is zero
+    vector: B58D-002
+    attacks: coerces + to alphabet index 0 instead of refusing it
+    file: mutants/plus-is-zero.mjs
+    raised_by: adversary
+
