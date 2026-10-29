@@ -3,7 +3,7 @@
 //
 // One JSON object on stdin, one JSON object on stdout, nothing else.
 // Byte arrays cross the wire as hex strings (see BRIEF.md, "The wire").
-// A thrown error crosses as data: { "throws": "<message>" }.
+// A thrown error crosses as data: { "throws": { "name": <class>, "message": <text> } }.
 
 import {
   base58btcDecode,
@@ -54,10 +54,10 @@ try {
       out = { bytesHex: bytesToHex(base58btcDecode(input.encoded)) };
       break;
     default:
-      out = { throws: `unknown operation: ${JSON.stringify(input.operation)}` };
+      out = { throws: { name: "Error", message: `unknown operation: ${JSON.stringify(input.operation)}` } };
   }
 } catch (error) {
-  out = { throws: error.message };
+  out = { throws: { name: error.name, message: error.message } };
 }
 
 process.stdout.write(`${JSON.stringify(out)}\n`);

@@ -3,33 +3,41 @@ operation: base58btcDecode
 
 vectors:
   - id: v1
-    title: the digit 0 is refused at its position
-    from: code
+    title: the digit 0 is refused where it stands, as a plain codec error
+    from: brief
     given:
       encoded: "0"
     expect:
-      throws: "base58btc: invalid character \"0\" at position 0"
+      throws:
+        name: Error
+        message: "base58btc: invalid character \"0\" at position 0"
 
   - id: v2
-    title: the letter O is refused at its position
-    from: code
+    title: an offending character fails at its own position, not the start of the input
+    from: brief
     given:
-      encoded: O
+      encoded: 1O
     expect:
-      throws: "base58btc: invalid character \"O\" at position 0"
+      throws:
+        name: Error
+        message: "base58btc: invalid character \"O\" at position 1"
 
   - id: v3
-    title: the letter I is refused at its position
-    from: code
+    title: the letter I is refused where it stands
+    from: brief
     given:
       encoded: I
     expect:
-      throws: "base58btc: invalid character \"I\" at position 0"
+      throws:
+        name: Error
+        message: "base58btc: invalid character \"I\" at position 0"
 
   - id: v4
-    title: the letter l is refused at its position
-    from: code
+    title: the letter l is refused where it stands
+    from: brief
     given:
       encoded: l
     expect:
-      throws: "base58btc: invalid character \"l\" at position 0"
+      throws:
+        name: Error
+        message: "base58btc: invalid character \"l\" at position 0"

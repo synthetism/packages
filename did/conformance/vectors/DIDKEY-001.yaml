@@ -3,25 +3,25 @@ operation: didKeyFromPublicKey
 
 vectors:
   - id: v1
-    title: the README key derives the DID the README promises
-    from: code
+    title: a 32-byte key derives its DID by encoding and nothing else
+    from: brief
     given:
-      publicKeyHex: b078fed776413d8be5918ef229480acb51586fed28b8eeec4066077f84547784
+      publicKeyHex: deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
     expect:
-      did: did:key:z6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw
+      did: did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk
 
   - id: v2
-    title: the all-zero key derives a fixed DID, no randomness and no state
-    from: code
+    title: uppercase hex derives the same DID as lowercase
+    from: brief
     given:
-      publicKeyHex: "0000000000000000000000000000000000000000000000000000000000000000"
+      publicKeyHex: DEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF
     expect:
-      did: did:key:z6MkeTG3bFFSLYVU7VqhgZxqr6YzpaGrQtFMh1uvqGy1vDnP
+      did: did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk
 
   - id: v3
-    title: uppercase hex derives the same DID as lowercase
-    from: code
+    title: mixed-case hex derives the same canonical DID
+    from: brief
     given:
-      publicKeyHex: B078FED776413D8BE5918EF229480ACB51586FED28B8EEEC4066077F84547784
+      publicKeyHex: deadBEEFdeadBEEFdeadBEEFdeadBEEFdeadBEEFdeadBEEFdeadBEEFdeadBEEF
     expect:
-      did: did:key:z6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw
+      did: did:key:z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk

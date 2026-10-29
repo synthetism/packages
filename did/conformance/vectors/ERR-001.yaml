@@ -1,0 +1,23 @@
+invariant: ERR-001
+operation: publicKeyFromDidKey
+
+vectors:
+  - id: v1
+    title: a fault the codec detected surfaces from the DID layer as a DidKeyError
+    from: brief
+    given:
+      did: did:key:z0abc
+    expect:
+      throws:
+        name: DidKeyError
+        message: "invalid base58btc payload in \"did:key:z0abc\" (invalid character \"0\" at position 0)"
+
+  - id: v2
+    title: a fault the DID layer detected itself is a DidKeyError
+    from: brief
+    given:
+      did: did:web:synthetism.invalid
+    expect:
+      throws:
+        name: DidKeyError
+        message: "not a did:key: \"did:web:synthetism.invalid\""
