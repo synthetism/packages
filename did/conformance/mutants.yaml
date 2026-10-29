@@ -1,0 +1,3 @@
+# Empty on purpose. This suite was reconstructed from the implementation; no attack pass has
+# run yet. The adversary fills this, not the reconstructor.
+mutants: []

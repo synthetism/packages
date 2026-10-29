@@ -1,0 +1,17 @@
+{
+  "name": "@synthetism/vc-conformance",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Conformance suite for the verifiable-credential issue/verify library.",
+  "type": "module",
+  "scripts": {
+    "suite": "conformance-runner suite",
+    "judge": "conformance-runner judge"
+  },
+  "devDependencies": {
+    "@conformance/runner": "file:../../../conformance/runner"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

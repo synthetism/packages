@@ -1,0 +1,35 @@
+invariant: RESOLVE-003
+operation: publicKeyFromDidKey
+
+vectors:
+  - id: v1
+    title: another DID method is refused as not a did:key
+    from: code
+    given:
+      did: did:web:example.com
+    expect:
+      throws: "not a did:key: \"did:web:example.com\""
+
+  - id: v2
+    title: a non-z multibase prefix is refused
+    from: code
+    given:
+      did: did:key:Q6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw
+    expect:
+      throws: "unsupported multibase prefix in \"did:key:Q6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw\" (expected \"z\")"
+
+  - id: v3
+    title: a non-Ed25519 multicodec prefix is refused rather than misread
+    from: code
+    given:
+      did: did:key:zQcN6hz2AfpnpMxZzrofCFv3F5yZaoGapVjo2xWhjUXFmT1
+    expect:
+      throws: "not an Ed25519 did:key (unexpected multicodec prefix)"
+
+  - id: v4
+    title: a 33-byte multicodec payload is refused as the wrong length
+    from: code
+    given:
+      did: did:key:z2DQXfKY1qzQ6rSjze4EfyByvFDwyBgmjUx8ZvZmyjRvh4a
+    expect:
+      throws: "expected 34 multicodec bytes, got 33"

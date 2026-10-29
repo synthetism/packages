@@ -1,0 +1,35 @@
+invariant: DIDKEY-002
+operation: didKeyFromPublicKey
+
+vectors:
+  - id: v1
+    title: a 31-byte key is refused as the wrong length
+    from: code
+    given:
+      publicKeyHex: b078fed776413d8be5918ef229480acb51586fed28b8eeec4066077f845477
+    expect:
+      throws: "expected a 32-byte Ed25519 public key, got 31 bytes"
+
+  - id: v2
+    title: a 33-byte key is refused as the wrong length
+    from: code
+    given:
+      publicKeyHex: b078fed776413d8be5918ef229480acb51586fed28b8eeec4066077f8454778400
+    expect:
+      throws: "expected a 32-byte Ed25519 public key, got 33 bytes"
+
+  - id: v3
+    title: an odd-length hex string is refused as malformed hex
+    from: code
+    given:
+      publicKeyHex: abc
+    expect:
+      throws: "expected an even-length hex string, got \"abc\""
+
+  - id: v4
+    title: a 64-character string with non-hex characters is refused
+    from: code
+    given:
+      publicKeyHex: zz78fed776413d8be5918ef229480acb51586fed28b8eeec4066077f84547784
+    expect:
+      throws: "expected an even-length hex string, got \"zz78fed776413d8be5918ef229480acb51586fed28b8eeec4066077f84547784\""

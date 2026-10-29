@@ -1,0 +1,35 @@
+invariant: B58D-002
+operation: base58btcDecode
+
+vectors:
+  - id: v1
+    title: the digit 0 is refused at its position
+    from: code
+    given:
+      encoded: "0"
+    expect:
+      throws: "base58btc: invalid character \"0\" at position 0"
+
+  - id: v2
+    title: the letter O is refused at its position
+    from: code
+    given:
+      encoded: O
+    expect:
+      throws: "base58btc: invalid character \"O\" at position 0"
+
+  - id: v3
+    title: the letter I is refused at its position
+    from: code
+    given:
+      encoded: I
+    expect:
+      throws: "base58btc: invalid character \"I\" at position 0"
+
+  - id: v4
+    title: the letter l is refused at its position
+    from: code
+    given:
+      encoded: l
+    expect:
+      throws: "base58btc: invalid character \"l\" at position 0"

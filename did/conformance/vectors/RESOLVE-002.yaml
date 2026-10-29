@@ -1,0 +1,19 @@
+invariant: RESOLVE-002
+operation: publicKeyFromDidKey
+
+vectors:
+  - id: v1
+    title: a key fragment resolves to the base DID's key
+    from: code
+    given:
+      did: did:key:z6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw#key-1
+    expect:
+      publicKeyHex: b078fed776413d8be5918ef229480acb51586fed28b8eeec4066077f84547784
+
+  - id: v2
+    title: a path and query resolve to the base DID's key
+    from: code
+    given:
+      did: did:key:z6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw/path?service=agent
+    expect:
+      publicKeyHex: b078fed776413d8be5918ef229480acb51586fed28b8eeec4066077f84547784

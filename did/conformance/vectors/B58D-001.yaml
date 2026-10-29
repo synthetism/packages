@@ -1,0 +1,27 @@
+invariant: B58D-001
+operation: base58btcDecode
+
+vectors:
+  - id: v1
+    title: the empty string decodes to no bytes
+    from: code
+    given:
+      encoded: ""
+    expect:
+      bytesHex: ""
+
+  - id: v2
+    title: three leading 1 characters decode to three leading zero bytes
+    from: code
+    given:
+      encoded: 1114dPa
+    expect:
+      bytesHex: 0000000acca5
+
+  - id: v3
+    title: the README DID's payload decodes to 0xed01 concatenated with the README key
+    from: code
+    given:
+      encoded: 6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw
+    expect:
+      bytesHex: ed01b078fed776413d8be5918ef229480acb51586fed28b8eeec4066077f84547784

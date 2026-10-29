@@ -1,0 +1,19 @@
+invariant: RESOLVE-001
+operation: publicKeyFromDidKey
+
+vectors:
+  - id: v1
+    title: the README DID resolves to the README key
+    from: code
+    given:
+      did: did:key:z6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw
+    expect:
+      publicKeyHex: b078fed776413d8be5918ef229480acb51586fed28b8eeec4066077f84547784
+
+  - id: v2
+    title: the zero-key DID resolves to 32 zero bytes
+    from: code
+    given:
+      did: did:key:z6MkeTG3bFFSLYVU7VqhgZxqr6YzpaGrQtFMh1uvqGy1vDnP
+    expect:
+      publicKeyHex: "0000000000000000000000000000000000000000000000000000000000000000"

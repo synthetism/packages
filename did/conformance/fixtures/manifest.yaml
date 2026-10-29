@@ -1,0 +1,2 @@
+# No fixtures: every value in this suite is pinned directly in the vectors' expect blocks.
+fixtures: []

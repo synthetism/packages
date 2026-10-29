@@ -1,0 +1,35 @@
+invariant: B58E-001
+operation: base58btcEncode
+
+vectors:
+  - id: v1
+    title: empty input encodes to the empty string
+    from: code
+    given:
+      bytesHex: ""
+    expect:
+      encoded: ""
+
+  - id: v2
+    title: two leading zero bytes become two leading 1 characters
+    from: code
+    given:
+      bytesHex: 0000ffff
+    expect:
+      encoded: 11LUv
+
+  - id: v3
+    title: a single zero byte with a nonzero tail becomes 1 then the value
+    from: code
+    given:
+      bytesHex: "0001"
+    expect:
+      encoded: "12"
+
+  - id: v4
+    title: the Ed25519 multicodec payload encodes to the payload half of the README DID
+    from: code
+    given:
+      bytesHex: ed01b078fed776413d8be5918ef229480acb51586fed28b8eeec4066077f84547784
+    expect:
+      encoded: 6MkrL8otjELxqEcmQZHM11UE1n9czAYSWNLQKRfXQH1ypnw
