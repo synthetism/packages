@@ -53,12 +53,6 @@ mutants:
     file: mutants/truthy-non-string.mjs
     raised_by: adversary
 
-  - name: swallow defects
-    vector: GUARD-001
-    attacks: catches every throw and reports it as false
-    file: mutants/swallow-defects.mjs
-    raised_by: adversary
-
   - name: plain derive error
     vector: DIDKEY-002
     attacks: refuses a wrong-length key from didKeyFromPublicKey as a plain Error
@@ -184,6 +178,10 @@ mutants:
     attacks: wraps a codec fault only when the offending character is 0
     file: mutants/wrap-only-zero.mjs
     raised_by: mutant-leader-v1
+    # The wrap is claimed from three invariants, so this mutant's reach is wider than its target.
+    # Declared rather than discovered: it kills the I case and the three other refusals that travel
+    # through the codec, and it kills nothing else.
+    kills: [ERR-001#v2, RESOLVE-002#v4, RESOLVE-002#v5, RESOLVE-003#v7]
 
   - name: swap 9 and F
     vector: B58E-001

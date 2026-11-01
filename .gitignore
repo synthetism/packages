@@ -5,6 +5,9 @@ coverage
 *.tgz
 .DS_Store
 
+# Verdicts kept by `conformance-runner --save`. Evidence for a human, not sources.
+.conformance-runs/
+
 # A staged publish credential must never be committed.
 .npmrc
 

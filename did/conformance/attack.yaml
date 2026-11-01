@@ -1,0 +1,230 @@
+# The offence and defence record. One record per mutant that survived at
+# handover. Nothing else, and no optional keys.
+#
+# Two pathways and no third one. If an aim can be made, the outcome is a record
+# here. If it cannot be made for a reason outside the agent's control, that is a
+# question to the owner (questions.yaml) and it is not this file's business.
+#
+# Flat on purpose. There are no pass numbers: passes are a schedule, a schedule
+# is not evidence, and there may be a hundred of them in one week. Scan by
+# status, sort by date, read the answers.
+#
+# `read` says whether the agent had read the implementation when it made the aim.
+# A blind aim is recorded here, never assumed.
+
+records:
+  - id: a1
+    date: 2026-10-29
+    mutant: deadbeef lookup
+    agent: adversary
+    read: blind
+    status: closed
+    answer: vector blindness. v4 added a second key deriving its own DID.
+
+  - id: a2
+    date: 2026-10-29
+    mutant: trim did
+    agent: adversary
+    read: blind
+    status: closed
+    answer: vector blindness. RESOLVE-003 v6 refuses a whitespace-padded DID and GUARD-001 v6 pins the same at the guard.
+
+  - id: a3
+    date: 2026-10-29
+    mutant: plain derive error
+    agent: adversary
+    read: blind
+    status: closed
+    answer: an aim artifact rather than a hole. The mutant implements didKeyFromPublicKey and ERR-001 only calls publicKeyFromDidKey, so it was re-aimed at DIDKEY-002 where the runner observes the kill. ERR-001 kept one vector, the wrap, and its former v2 was dropped as a duplicate of RESOLVE-003 v1.
+
+  - id: a4
+    date: 2026-10-29
+    mutant: swapped unused digits
+    agent: adversary
+    read: blind
+    status: closed
+    answer: vector blindness. B58E-001 v4 added 0000b4 to 1147, with B58D-001 v4 its exact inverse on the decode side.
+
+  - id: a5
+    date: 2026-10-29
+    mutant: plus is zero
+    agent: adversary
+    read: blind
+    status: closed
+    answer: vector blindness. B58D-002 v5 refuses plus at its position instead of coercing it to zero.
+
+  - id: a7
+    date: 2026-10-29
+    mutant: shift leading zero
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. DIDKEY-001 v5 derives the DID of a leading 00 key, the inverse of RESOLVE-001 v2.
+
+  - id: a8
+    date: 2026-10-29
+    mutant: unwrap sec1
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. DIDKEY-002 v6 pins that a 33-byte key starting 00 is still 33 bytes.
+
+  - id: a9
+    date: 2026-10-29
+    mutant: strip 0x
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: the brief was sharpened. A 0x prefix is a non-hex fault rather than a convenience, and DIDKEY-002 v7 pins it.
+
+  - id: a10
+    date: 2026-10-29
+    mutant: unpinned is zero
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. RESOLVE-001 v3 added a third key that resolves to itself.
+
+  - id: a11
+    date: 2026-10-29
+    mutant: semicolon delim
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: the brief was sharpened. Only slash, query and fragment delimit, and RESOLVE-002 v4 pins a semicolon as an invalid payload character.
+
+  - id: a12
+    date: 2026-10-29
+    mutant: percent decode
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: the brief was sharpened. The DID is not decoded before it is stripped, and RESOLVE-002 v5 pins percent with a position.
+
+  - id: a13
+    date: 2026-10-29
+    mutant: accept x25519
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. RESOLVE-003 v3 moved the other-curve case from multicodec ed02 to X25519 ec01, the confusion worth making.
+
+  - id: a14
+    date: 2026-10-29
+    mutant: accept multibase Z
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. RESOLVE-003 v2 moved its prefix from Q to Z, which kills case-folding and any-prefix at once.
+
+  - id: a15
+    date: 2026-10-29
+    mutant: trim payload
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: the brief was sharpened. The payload is taken whole, and RESOLVE-003 v7 pins whitespace inside it.
+
+  - id: a16
+    date: 2026-10-29
+    mutant: scheme casefold
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: the brief was sharpened. The scheme is case-sensitive, and RESOLVE-003 v8 pins a case-folded scheme as refused.
+
+  - id: a17
+    date: 2026-10-29
+    mutant: truncate long
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. RESOLVE-003 v9 pins a 35-byte payload.
+
+  - id: a18
+    date: 2026-10-29
+    mutant: guard skips multicodec
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. GUARD-001 v7 pins a wrong-curve DID as false.
+
+  - id: a19
+    date: 2026-10-29
+    mutant: guard rejects path
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. RESOLVE-002 already said a path resolves, and GUARD-001 v8 pins path and query as true.
+
+  - id: a20
+    date: 2026-10-29
+    mutant: object is key
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. GUARD-001 v9 pins null as false. The first pass had trimmed exactly this case.
+
+  - id: a21
+    date: 2026-10-29
+    mutant: wrap only zero
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness, with one thing still reported. ERR-001 v2 pins a codec fault about I rather than 0. The mutant now dies in four places because the wrap is claimed from three invariants, so the runner reports collateral on RESOLVE-002 v4, RESOLVE-002 v5 and RESOLVE-003 v7. That stays reported until the mutant declares kills, which the runner does not yet grade.
+
+  - id: a22
+    date: 2026-10-29
+    mutant: swap 9 and F
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. B58E-001 v5 pins 016600 to UF9.
+
+  - id: a23
+    date: 2026-10-29
+    mutant: all zero empty
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. B58E-001 v6 pins 0000 to 11.
+
+  - id: a24
+    date: 2026-10-29
+    mutant: drop internal zero
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. Closed by B58E-001 v5, alongside swap 9 and F.
+
+  - id: a25
+    date: 2026-10-29
+    mutant: swap 9 and F decode
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. B58D-001 v6 pins UF9 to 016600.
+
+  - id: a26
+    date: 2026-10-29
+    mutant: ones only empty
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. B58D-001 v5 pins 11 to 0000.
+
+  - id: a27
+    date: 2026-10-29
+    mutant: drop internal zero decode
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. Closed by B58D-001 v6.
+
+  - id: a28
+    date: 2026-10-29
+    mutant: strip codec space
+    agent: mutant-leader-v1
+    read: code
+    status: closed
+    answer: vector blindness. B58D-002 v6 pins a trailing space as an invalid character at position 5.
