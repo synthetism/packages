@@ -110,7 +110,8 @@ DIDs (see ERR-001).
 |---|---|---|
 | bytes on the wire as hex strings | array of integers, base64 | a malformed-hex `bytesHex` fails in the wrapper, before the library runs — such a vector could not distinguish wrapper failure from library refusal |
 | refusals cross as `{ name, message }` and both are pinned | message text alone | a JavaScript class name is pinned into a language-neutral protocol, and a reworded message still reddens the suite with behaviour unchanged |
-
+| the class name on the wire (`throws.name`) | a closed refusal-category enum — `malformed-hex`, `bad-length`, `unsupported-multibase`, `unsupported-curve`, `not-a-did-key`, `bad-payload` | a caller can catch but cannot branch on the kind of refusal; **trigger: the first consumer that needs to branch** — the enum then replaces the class name, and the adapter gains a translation table a mutant can attack |
+| the guard swallows every throw, defects included | a surgical catch of `DidKeyError` only | a defect inside the parser reports `false`; accepted — the resolver's vectors pin every refusal stage with exact messages, so a defect reddens `judge` at the source, and a guard that can throw is a trap callers forgot to catch |
 | the wrapper imports the built `dist/` | `src/` under a loader | a stale build silently judges yesterday's code |
 | precedence between two faults is not claimed | a fixed order — charset before parity | an input with two faults gets a different message from each conformant implementation. The promise is that a refusal names a real fault, and both do. Pinning an order would settle a question the claim never asks, and pin a string no consumer should read |
 
