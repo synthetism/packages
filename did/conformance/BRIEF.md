@@ -68,13 +68,14 @@ otherwise normalised before it, and the payload is taken whole — never sliced 
 Every refusal from this operation is a `DidKeyError` (see ERR-001), including a fault
 detected by the codec underneath.
 
-### GUARD-001 — isDidKey never throws on malformed input: every refusal becomes false, and true means the string resolves
+### GUARD-001 — isDidKey is total: every input returns a boolean, none throws, and true means the string resolves
 
 The guard exists so callers can ask without catching. It returns true for a resolvable
-`did:key` string and false for everything else — malformed strings, other DID methods,
-non-strings. It catches `DidKeyError`, the surface's only refusal (see ERR-001), and
-nothing else: a defect inside the parser propagates, because a guard that swallowed defects
-would report them as `false` — an answer a caller cannot distinguish from "no".
+`did:key` string — bare, or a DID URL over one — and false for everything else:
+non-strings, malformed strings, other DID methods, other curves. The false-set is closed:
+every refusal stage of the resolver has a vector here, so a guard that catches everything
+and a guard that catches exactly the refusals agree on the whole contract. Totality is the
+promise; a guard that can throw is a trap callers forgot to catch.
 
 ### ERR-001 — every refusal from a DID-layer operation is a DidKeyError; the codec's refusals are plain
 
@@ -84,7 +85,11 @@ layer detected the fault — a caller catching `DidKeyError` misses nothing.
 plain: `DidKeyError` is a DID-layer type, and wrapping inside the codec would be a
 layering error dressed as a convenience. The class crosses the wire as `throws.name`
 (see Decisions), so a mutant that throws a plain `Error` where the claim says
-`DidKeyError` is killed by these vectors.
+`DidKeyError` is killed by these vectors. The name is a literal string on the wire: a
+JavaScript `Error` subclass inherits the name `Error` unless it sets one, so the DID-layer
+error MUST set its name to `DidKeyError`, and the codec's errors MUST NOT be renamed. A
+`Base58Error` with no explicit name is exactly right; a `DidKeyError` without one is a red
+suite.
 
 ### B58E-001 — base58btcEncode renders the bytes' numeric value in the Bitcoin alphabet and renders each leading zero byte as one leading "1"
 
@@ -111,13 +116,8 @@ DIDs (see ERR-001).
 | refusals cross as `{ name, message }` and both are pinned | message text alone | a JavaScript class name is pinned into a language-neutral protocol, and a reworded message still reddens the suite with behaviour unchanged |
 | the class name on the wire (`throws.name`) | a closed refusal-category enum — `malformed-hex`, `bad-length`, `unsupported-multibase`, `unsupported-curve`, `not-a-did-key`, `bad-payload` | a caller can catch but cannot branch on the kind of refusal; **trigger: the first consumer that needs to branch** — the enum then replaces the class name, and the adapter gains a translation table a mutant can attack |
 | the wrapper imports the built `dist/` | `src/` under a loader | a stale build silently judges yesterday's code |
+| the guard swallows every throw, defects included | a surgical catch of `DidKeyError` only | a defect inside the parser reports `false`; accepted — the resolver's vectors pin every refusal stage with exact messages, so a defect reddens `judge` at the source, and a guard that can throw is a trap callers forgot to catch |
 | suite reconstructed from the code, green by construction | claims from spec prose | a green run proves the harness works, and nothing more |
-
-## Unchecked obligations
-
-| id | obligation | why the wire cannot carry it | who checks it |
-|---|---|---|---|
-| GUARD-001 (rethrow half) | a defect inside the parser propagates instead of becoming `false` | no input can summon a defect by definition; only a wrong implementation exhibits one | the adversary's mutants, then code review |
 
 ## Out of scope
 
@@ -161,7 +161,8 @@ Six survivors; five killed by new vectors, one confirmed unkillable and already 
   runner observes the kill.
 - DIDKEY-002 v5's `z`-string was 191 chars — the adversary caught it conflating parity
   and charset faults. Now exactly 200; it pins the bound and nothing else.
-- `swallow defects` stands as the sole survivor — the declared unchecked obligation.
+- `swallow defects` stood as the sole survivor — then the human chose totality on
+  2026-11-01: the obligation, the mutant file, and q2 are gone; the cost is a Decisions row.
 
 ### After the second attack (mutant-leader-v1, source read, 23 new mutants)
 

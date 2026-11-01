@@ -9,7 +9,7 @@
     "judge": "conformance-runner judge"
   },
   "devDependencies": {
-    "@conformance/runner": "file:../../../conformance/runner"
+    "conformance-runner": "file:../../../conformance/runner"
   },
   "engines": {
     "node": ">=20"

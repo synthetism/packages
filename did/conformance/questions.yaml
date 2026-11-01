@@ -17,13 +17,3 @@ questions:
       - Three readings. Out of scope, which loses the strongest promise in the package. An obligation in the brief, checked by review and by nobody else. Or wait until the format can express a claim across two operations.
       - Nothing else in this suite is blocked by it.
     closed_at: null
-
-  - id: q2
-    invariant: GUARD-001
-    status: open
-    raised_by: human
-    messages:
-      - Found on 2026-10-31 while porting ATTACK.md. mutants/swallow-defects.mjs is on disk, mutants.yaml holds 37 entries and names neither the file nor the mutant. It was withdrawn on 2026-10-30 because a permanent survivor keeps the suite red forever.
-      - Three readings. Restore it to the manifest and accept that the suite is never ok while the obligation stands. Delete the file and let the brief obligation be the whole record. Or keep the file and point the obligation row at it as its evidence, with the runner never judging it.
-      - Nothing in the runner detects this state, so it stays a question rather than a violation.
-    closed_at: null

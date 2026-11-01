@@ -73,3 +73,19 @@ vectors:
       value: null
     expect:
       result: false
+
+  - id: v10
+    title: a non-z multibase prefix is false
+    from: brief
+    given:
+      value: did:key:Z6MkuSWDVBasnYTB2AuZvVSVkxtx5D11qvSLErboUkWmB3Xk
+    expect:
+      result: false
+
+  - id: v11
+    title: an overlong payload is false — the guard does not slice to fit
+    from: brief
+    given:
+      value: did:key:zQecnTZx7PiXA1pXEAj2K6XXw3iJ5Zy4ivrov9vc9V4MyLAgo
+    expect:
+      result: false
