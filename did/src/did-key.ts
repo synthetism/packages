@@ -30,9 +30,16 @@ export class DidKeyError extends Error {
 }
 
 function hexToBytes(hex: string): Uint8Array {
-  if (hex.length % 2 !== 0 || !/^[0-9a-fA-F]*$/.test(hex)) {
+  if (!/^[0-9a-fA-F]*$/.test(hex)) {
+    const shown = hex.length > 32 ? `${hex.slice(0, 32)}…` : hex;
     throw new DidKeyError(
-      `expected an even-length hex string, got ${JSON.stringify(hex)}`,
+      `expected hex characters, got ${JSON.stringify(shown)}`,
+    );
+  }
+  if (hex.length % 2 !== 0) {
+    const shown = hex.length > 32 ? `${hex.slice(0, 32)}…` : hex;
+    throw new DidKeyError(
+      `expected an even-length hex string, got ${JSON.stringify(shown)}`,
     );
   }
   const bytes = new Uint8Array(hex.length / 2);
@@ -107,7 +114,19 @@ export function didKeyFromPublicKey(publicKeyHex: string): DidKey {
  * @throws {DidKeyError} if the DID is malformed or not Ed25519
  */
 export function publicKeyFromDidKey(did: string): string {
-  const bytes = base58btcDecode(stripDidKey(did));
+  const payload = stripDidKey(did);
+  let bytes: Uint8Array;
+  try {
+    bytes = base58btcDecode(payload);
+  } catch (error) {
+    const detail =
+      error instanceof Error
+        ? error.message.replace(/^base58btc:\s*/, "")
+        : String(error);
+    throw new DidKeyError(
+      `invalid base58btc payload in ${JSON.stringify(did)} (${detail})`,
+    );
+  }
 
   if (bytes.length !== ED25519_PUB.length + 32) {
     throw new DidKeyError(
@@ -129,7 +148,8 @@ export function isDidKey(value: unknown): value is DidKey {
   try {
     publicKeyFromDidKey(value);
     return true;
-  } catch {
-    return false;
+  } catch (error) {
+    if (error instanceof DidKeyError) return false;
+    throw error;
   }
 }
